@@ -1,8 +1,8 @@
 clear all; clc;
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% PD + Feedforward control %
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Feedback Linearization control %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % ----------- SETTINGS ----------- %
 
@@ -22,7 +22,7 @@ m2 = 1;
 d2 = 1;
 l2 = 2;
 
-g0 = 0;
+g0 = 9.8;
 
 % PD control
 Kp = 0.01 * eye(n);
@@ -41,7 +41,6 @@ ddqi  = [0; 0];
 ui    = [0; 0];
 ei    = qd-qs;
 eprec = ei;
-
 
 % Bounds
 min_dq = [deg2rad(-400); deg2rad(-400)];
@@ -74,9 +73,6 @@ dq2_plot = zeros(1,T);
 u1_plot = zeros(1,T);
 u2_plot = zeros(1,T);
 
-% Feedforward term => M(qd)*dq + c(q,dq) + g(q) + friction model
-ffwd = eval_M(a, qd) * ddqd + eval_C(a, qd, dqd) + eval_G(a, qd);
-
 % Control scheme
 for i=1:dt:T
     % Plots
@@ -92,16 +88,22 @@ for i=1:dt:T
     % Current error
     ei = double(qd - qi);
     
-    % Inverse dynamics compensation FFW + PD
-    ui = ffwd + Kp * ei + Kd * (ei - eprec) / dt;
+    % Global asymptotic stabilization -> a term at i-th iteration
+    ai = ddqd + Kd * (ei - eprec) / dt + Kp * ei;
+    
+    % Updatin precedent error for next derivatives
     eprec = ei;
-       
-    Mi = eval_M(a, qi);
-    %ffwi = Mi * ddqi + eval_C(a, qi, dqi) + eval_G(a, qi);
-    ddqi = double(Mi \ (ui));
+    
+    % Working in nominal conditions -> otherwise M and C are estimated
+    ui =  eval_M(a, qi) * ai + eval_C(a, qi, dqi);
+    
+    % Entering in ROBOT model, using real M and C
+    ui = ui - eval_C(a, qi, dqi);
+    ddqi = double(eval_M(a, qi) \ (ui));
+    
     %ddqi = clamp(ddqi, -0.05, 0.05); % clamping acceleration
     dqi = dqi + integrate(ddqi, dt);
-    dqi = clamp(dqi, min_dq, max_dq); % clamping velocity
+    %dqi = clamp(dqi, min_dq, max_dq); % clamping velocity
     qi = qi + integrate(dqi, dt);
 end
 
