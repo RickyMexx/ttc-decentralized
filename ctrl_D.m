@@ -7,14 +7,14 @@ clear all; clc;
 % ----------- SETTINGS ----------- %
 
 % Total time and sampling time (in ms)
-T  = 2000;
+T  = 5000;
 dt = 1;
 
 % Number of joints
 n = 2; 
 
 % Motors
-nr = [0.2 0.5]; % Reduction ratios
+nr = [200 150]; % Reduction ratios
 bm = [0.4 0.3]; % Motor viscous friction 
 
 % Links
@@ -32,10 +32,10 @@ l2 = 2;
 g0 = 9.8;
 
 % PD control
-Kp = 0.01 * eye(n);
-Kd = 0.1 * eye(n);
-%Kp = 2 * eye(n);
-%Kd = 5 * eye(n);
+%Kp = 0.5 * eye(n);
+%Kd = 0.1 * eye(n);
+Kp = 60 * eye(n);
+Kd = 90 * eye(n);
 
 % Final conditions
 qd    = [pi/2; pi/2];
@@ -85,7 +85,7 @@ a = [a1; a2; a3; a4; a5];
 
 % Motors transmission ratio
 N = diag(nr);
-Np = N';
+Np = inv(N);
 
 % Diagonal matrix with constants elements of inertia matrix M => M = Mc + Mr
 Mc = Np * diag([a1 a3]) * Np;
