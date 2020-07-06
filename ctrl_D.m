@@ -1,8 +1,8 @@
 clear all; clc;
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% PD + Feedforward control %
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%
+% Decentralized control %
+%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % ----------- SETTINGS ----------- %
 
@@ -13,6 +13,13 @@ dt = 1;
 % Number of joints
 n = 2; 
 
+% Motors
+nr = [0.2 0.2]; % Reduction ratios
+bm = [1 1]; % Motor viscous friction 
+
+% Links
+bl = [1 1]; % Link viscous friction 
+
 % Settings for 2R robot
 m1 = 1;
 d1 = 1;
@@ -22,11 +29,13 @@ m2 = 1;
 d2 = 1;
 l2 = 2;
 
-g0 = 0;
+g0 = 9.8;
 
 % PD control
 Kp = 0.01 * eye(n);
 Kd = 0.1 * eye(n);
+%Kp = 2 * eye(n);
+%Kd = 5 * eye(n);
 
 % Final conditions
 qd    = [pi/2; pi/2];
@@ -42,6 +51,10 @@ ui    = [0; 0];
 ei    = qd-qs;
 eprec = ei;
 
+% Motors initial conditions
+qmi = [0; 0];
+dqmi = [0; 0];
+ddqmi = [0; 0];
 
 % Bounds
 min_dq = [deg2rad(-400); deg2rad(-400)];
@@ -57,13 +70,36 @@ q = transpose(q);
 % ddq = transpose(ddq);
 
 % 2R robot
+Ic1zz = 1;
+Ic2zz = 1;
 m = [m1; m2];
-a1 = m1 * d1^2 + m2 * d2^2 + m2 * l1^2;
+a1 = Ic1zz + Ic2zz + m1 * d1^2 + m2 * d2^2 + m2 * l1^2;
 a2 = m2 * l1 * d2;
-a3 = m2 * d2^2;
+a3 = Ic2zz + m2 * d2^2;
 a4 = g0*(m1*d1 + m2*l1);
 a5 = g0 * m2 * d2;
 a = [a1; a2; a3; a4; a5];
+
+% Motors transmission ratio
+N = diag(nr);
+Np = N';
+
+% Diagonal matrix with constants elements of inertia matrix M => M = Mc + Mr
+Mc = Np * diag([a1 a3]) * Np;
+
+% Moment of inertia
+%J = diag([1 1] / n2.^2);
+J = diag([0 0]);
+
+% Cofficients of viscuous friction of the motors
+D = diag(bl / nr.^2 + bm);
+
+
+% Disturbance
+di = [0; 0];
+
+% Final equation
+% (J + Mc) ddqm + D dqm + d = taum
 
 q1_plot = zeros(1,T);
 q2_plot = zeros(1,T);
@@ -74,35 +110,40 @@ dq2_plot = zeros(1,T);
 u1_plot = zeros(1,T);
 u2_plot = zeros(1,T);
 
-% Feedforward term => M(qd)*dq + c(q,dq) + g(q) + friction model
-ffwd = eval_M(a, qd) * ddqd + eval_C(a, qd, dqd) + eval_G(a, qd);
-
+something = (J + Mc)'
 % Control scheme
 for i=1:dt:T
     % Plots
-    q1_plot(i) = qi(1);
-    q2_plot(i) = qi(2);
+    q1_plot(i) = qmi(1);
+    q2_plot(i) = qmi(2);
     e1_plot(i) = ei(1);
     e2_plot(i) = ei(2);
-    dq1_plot(i) = dqi(1);
-    dq2_plot(i) = dqi(2);
+    dq1_plot(i) = dqmi(1);
+    dq2_plot(i) = dqmi(2);
     u1_plot(i) = ui(1);
     u2_plot(i) = ui(2);
     
     % Current error
-    ei = double(qd - qi);
+    ei = double(qd - qmi);
     
-    % Inverse dynamics compensation FFW + PD
-    ui = ffwd + Kp * ei + Kd * (ei - eprec) / dt;
+    % PD + FFW control, Torque of the motors
+    ai = ddqd + Kd * (ei - eprec) / dt + Kp * ei;
+    ui = (J + Mc) * ai + D * dqmi + di;
+    
+    % Updating precedent error for next derivatives
     eprec = ei;
-       
-    Mi = eval_M(a, qi);
-    %ffwi = Mi * ddqi + eval_C(a, qi, dqi) + eval_G(a, qi);
-    ddqi = double(Mi \ (ui));
+    
+    % Joints acceleration [MOTORS]
+    sum = ui - D * dqmi - di; % qui esplode
+    ddqmi = (J + Mc)' * sum;
+    
     %ddqi = clamp(ddqi, -0.05, 0.05); % clamping acceleration
-    dqi = dqi + integrate(ddqi, dt);
-    dqi = clamp(dqi, min_dq, max_dq); % clamping velocity
-    qi = qi + integrate(dqi, dt);
+    dqmi = dqmi + integrate(ddqmi, dt);
+    %dqi = clamp(dqi, min_dq, max_dq); % clamping velocity
+    qmi = qmi + integrate(dqmi, dt);
+       
+    % Updating disturbance
+    di = Np * eval_Mr(a, qmi) * Np + Np * eval_C(a, qmi, dqmi) + Np * eval_G(a, qmi);
 end
 
 
@@ -126,6 +167,11 @@ plotsubplot(rows, cols, 8, u2_plot*1000, 'ms', 'Nm', 'Joint 2: control torque', 
 
 function M = eval_M(a, q)
 M = double([a(1) + 2*a(2)*cos(q(2)) a(3)+a(2)*cos(q(2)); a(3)+a(2)*cos(q(2)) a(3)]);
+end
+
+% Diagonal matrix with residual elements of inertia matrix M
+function Mr = eval_Mr(a, q)
+Mr = double(diag([2*a(2)*cos(q(2)) 0]));
 end
 
 function C = eval_C(a, q, dq)

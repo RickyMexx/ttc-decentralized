@@ -91,7 +91,7 @@ for i=1:dt:T
     % Global asymptotic stabilization -> a term at i-th iteration
     ai = ddqd + Kd * (ei - eprec) / dt + Kp * ei;
     
-    % Updatin precedent error for next derivatives
+    % Updating precedent error for next derivatives
     eprec = ei;
     
     % Working in nominal conditions -> otherwise M and C are estimated
