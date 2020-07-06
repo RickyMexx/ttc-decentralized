@@ -14,7 +14,7 @@ dt = 1;
 n = 2; 
 
 % Motors
-nr = [200 150]; % Reduction ratios
+nr = [20 15]; % Reduction ratios
 bm = [0.4 0.3]; % Motor viscous friction 
 
 % Links
@@ -32,34 +32,28 @@ l2 = 2;
 g0 = 9.8;
 
 % PD control
-%Kp = 0.5 * eye(n);
-%Kd = 0.1 * eye(n);
-Kp = 60 * eye(n);
-Kd = 90 * eye(n);
+Kp = 1 * eye(n);
+Kd = 15 * eye(n);
+%Kp = 60 * eye(n);
+%Kd = 90 * eye(n);
 
 % Final conditions
 qd    = [pi/2; pi/2];
 dqd   = [0; 0];
 ddqd  = [0; 0];
 
-% Initial conditions
-qs    = [0; 0];
-qi    = qs;
-dqi   = [0; 0];
-ddqi  = [0; 0];
-ui    = [0; 0];
-
 % Motors initial conditions
-qmi = [0; 0];
-dqmi = [0; 0];
+qmi   = [0; 0];
+dqmi  = [0; 0];
 ddqmi = [0; 0];
+umi   = [0; 0];
 
 % Bounds
 min_dq = [deg2rad(-400); deg2rad(-400)];
 max_dq = [deg2rad(400); deg2rad(400)];
 
-min_u = [-300; -300] / 1000;
-max_u = [300; 300] / 1000;
+min_u = [-1000; -1000] / 1000;
+max_u = [1000; 1000] / 1000;
 
 % -------------------------------- %
 
@@ -102,11 +96,11 @@ di = [0; 0];
 % (J + Mc) ddqm + D dqm + d = taum
 
 % Angles wrapping to [-pi/2, pi/2]
-qd = wrapToPi(qd);
-qi = wrapToPi(qi);
+qd  = wrapToPi(qd);
+qmi = wrapToPi(qmi);
 
 % Starting error
-ei    = qd-qs;
+ei    = qd - qmi;
 eprec = ei;
 
 % Plots
@@ -128,22 +122,22 @@ for i=1:dt:T
     e2_plot(i) = ei(2);
     dq1_plot(i) = dqmi(1);
     dq2_plot(i) = dqmi(2);
-    u1_plot(i) = ui(1);
-    u2_plot(i) = ui(2);
+    u1_plot(i) = umi(1);
+    u2_plot(i) = umi(2);
     
     % Current error
     ei = double(qd - qmi);
     
     % PD + FFW control, Torque of the motors
     ai = ddqd + Kd * (ei - eprec) / dt + Kp * ei;
-    ui = (J + Mc) * ai + D * dqmi + di;
-    %ui = clamp(ui, min_u, max_u); % Clamping the i-th torque
+    umi = (J + Mc) * ai + D * dqmi + di;
+    %umi = clamp(umi, min_u, max_u); % Clamping the i-th torque
     
     % Updating precedent error for next derivatives
     eprec = ei;
     
     % Joints acceleration [MOTORS]
-    sum = ui - D * dqmi - di; % qui esplode
+    sum = umi - D * dqmi - di;
     ddqmi = (J + Mc)' * sum;
     
     %ddqi = clamp(ddqi, -0.05, 0.05); % clamping acceleration
