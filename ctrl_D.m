@@ -48,8 +48,6 @@ qi    = qs;
 dqi   = [0; 0];
 ddqi  = [0; 0];
 ui    = [0; 0];
-ei    = qd-qs;
-eprec = ei;
 
 % Motors initial conditions
 qmi = [0; 0];
@@ -97,13 +95,21 @@ J = diag([0 0]);
 % Cofficients of viscuous friction of the motors
 D = diag(bl / nr.^2 + bm);
 
-
 % Disturbance
 di = [0; 0];
 
 % Final equation
 % (J + Mc) ddqm + D dqm + d = taum
 
+% Angles wrapping to [-pi/2, pi/2]
+qd = wrapToPi(qd);
+qi = wrapToPi(qi);
+
+% Starting error
+ei    = qd-qs;
+eprec = ei;
+
+% Plots
 q1_plot = zeros(1,T);
 q2_plot = zeros(1,T);
 e1_plot = zeros(1,T);

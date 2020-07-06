@@ -39,9 +39,6 @@ qi    = qs;
 dqi   = [0; 0];
 ddqi  = [0; 0];
 ui    = [0; 0];
-ei    = qd-qs;
-eprec = ei;
-
 
 % Bounds
 min_dq = [deg2rad(-400); deg2rad(-400)];
@@ -65,6 +62,15 @@ a4 = g0*(m1*d1 + m2*l1);
 a5 = g0 * m2 * d2;
 a = [a1; a2; a3; a4; a5];
 
+% Angles wrapping to [-pi/2, pi/2]
+qd = wrapToPi(qd);
+qi = wrapToPi(qi);
+
+% Starting error
+ei    = qd-qs;
+eprec = ei;
+
+% Plots
 q1_plot = zeros(1,T);
 q2_plot = zeros(1,T);
 e1_plot = zeros(1,T);
