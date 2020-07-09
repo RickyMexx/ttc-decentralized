@@ -7,33 +7,36 @@ clear all; clc;
 % ----------- SETTINGS ----------- %
 
 % Total time and sampling time (in ms)
-T  = 5000;
+T  = 10000;
 dt = 1;
 
 % Number of joints
 n = 2; 
 
+% Settings for 2R robot
+m1 = 1;
+d1 = 1;
+l1 = 1.5;
+
+m2 = 1;
+d2 = 1;
+l2 = 1.5;
+
 % Motors
 nr = [20 15]; % Reduction ratios
 bm = [0.4 0.3]; % Motor viscous friction 
 
-% Links
+% Links params
 bl = [0.3 0.3]; % Link viscous friction 
+Ia = [0.3; 0.3]; % Extrernal radius
+Ib = [0; 0]; % Internal radius
+Ih = [l1; l2]; % Lenght
 
-% Settings for 2R robot
-m1 = 1;
-d1 = 1;
-l1 = 2;
-
-m2 = 1;
-d2 = 1;
-l2 = 2;
-
-g0 = 9.8;
+g0 = -9.8;
 
 % PD control
-Kp = 1 * eye(n);
-Kd = 15 * eye(n);
+Kp = 0.5 * eye(n);
+Kd = 20 * eye(n);
 %Kp = 60 * eye(n);
 %Kd = 90 * eye(n);
 
@@ -64,13 +67,13 @@ q = transpose(q);
 % syms ddq [1 n] real
 % ddq = transpose(ddq);
 
-% 2R robot
-Ic1zz = 1;
-Ic2zz = 1;
 m = [m1; m2];
-a1 = Ic1zz + Ic2zz + m1 * d1^2 + m2 * d2^2 + m2 * l1^2;
+% 2R robot
+Iczz = 1/12 * m.* (3*(Ia.^2 + Ib.^2).^2 + Ih.^2);
+
+a1 = Iczz(1) + Iczz(2) + m1 * d1^2 + m2 * d2^2 + m2 * l1^2;
 a2 = m2 * l1 * d2;
-a3 = Ic2zz + m2 * d2^2;
+a3 = Iczz(2) + m2 * d2^2;
 a4 = g0*(m1*d1 + m2*l1);
 a5 = g0 * m2 * d2;
 a = [a1; a2; a3; a4; a5];
@@ -83,7 +86,8 @@ Np = inv(N);
 Mc = Np * diag([a1 a3]) * Np;
 
 % Moment of inertia
-%J = diag([1 1] / n2.^2);
+%r = [0.1 0.1];
+%J = diag([m1*r(1)^2 m2*r(2)^2] / nr.^2);
 J = diag([0 0]);
 
 % Cofficients of viscuous friction of the motors
