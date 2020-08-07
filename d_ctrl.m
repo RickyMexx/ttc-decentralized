@@ -21,7 +21,7 @@ dqi = [0; 0]; % Initial joint velocity
 ddqi= [0; 0]; % Initial joint acceleration
 ui  = [0; 0]; % Initial torque input
 % Final conditions
-qd  = [pi/2; pi/4]; % Final joint state
+qd  = [pi/2; pi/2]; % Final joint state
 dqd = [0; 0]; % Final joint velocity
 ddqd= [0; 0]; % Final joint acceleration
 
@@ -32,13 +32,13 @@ ddq= ddqi; % Joint Acceleration
 u  = ui;   % Torque input
 
 % Joint bounds
-min_dq = [deg2rad(-400); deg2rad(-400)];
-max_dq = [deg2rad(400); deg2rad(400)];
+min_dq = [-10; -10];
+max_dq = [10; 10];
 
 %% Decentralized Joint Parameters
 J = diag([1., 1.]); % Inertia matrix
 D = diag([1., 1.]); % Viscous Friction matrix
-N = diag([500., 500.]); % Reduction ratio
+N = diag([200., 200.]); % Reduction ratio
 Ni = inv(N);
 
 %% PD-Controller Parameters
@@ -65,11 +65,14 @@ for i = 1:dt:T
     % Controller term
     err = double(qd - q);
     ai = kd * (err - err_prec) * idt + kp * err;
-    
+    % Compute command unit
     u = (J + Mbar) * ai + D * dq + d;
-    
+    % Update acceleration values and integrate
     ddq = inv(J + Mbr) * (u - D * dq - d);
     dq  = dq + integrate(ddq, dt);
+    %Constrain velocities
+    dq(1) = max(min(max_dq(1), dq(1)), min_dq(1));
+    dq(2) = max(min(max_dq(2), dq(2)), min_dq(2));
     q   = q  + integrate(dq, dt);    
     % Update error
     err_prec = err;
