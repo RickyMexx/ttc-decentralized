@@ -7,56 +7,63 @@ clear all; clc;
 % ----------- SETTINGS ----------- %
 
 % Total time and sampling time (in ms)
-T  = 10000;
+T  = 2000;
 dt = 1;
 
 % Number of joints
 n = 2; 
 
+% Motors
+nr = [0.2 0.2]; % Reduction ratios
+bm = [1 1]; % Motor viscous friction 
+
+% Links
+bl = [1 1]; % Link viscous friction 
+
 % Settings for 2R robot
 m1 = 1;
 d1 = 1;
-l1 = 1.5;
+l1 = 2;
 
 m2 = 1;
 d2 = 1;
-l2 = 1.5;
+l2 = 2;
 
-% Motors
-nr = [20 15]; % Reduction ratios
-bm = [0.4 0.3]; % Motor viscous friction 
-
-% Links params
-bl = [0.3 0.3]; % Link viscous friction 
-Ia = [0.3; 0.3]; % Extrernal radius
-Ib = [0; 0]; % Internal radius
-Ih = [l1; l2]; % Lenght
-
-g0 = -9.8;
+g0 = 9.8;
 
 % PD control
-Kp = 0.5 * eye(n);
-Kd = 20 * eye(n);
-%Kp = 60 * eye(n);
-%Kd = 90 * eye(n);
+Kp = 0.01 * eye(n);
+Kd = 0.1 * eye(n);
+%Kp = 2 * eye(n);
+%Kd = 5 * eye(n);
 
 % Final conditions
 qd    = [pi/2; pi/2];
 dqd   = [0; 0];
 ddqd  = [0; 0];
 
+% Initial conditions
+qs    = [0; 0];
+qi    = qs;
+dqi   = [0; 0];
+ddqi  = [0; 0];
+ui    = [0; 0];
+
+% Angles wrapping to [-pi/2, pi/2]
+qd  = wrapToPi(qd);
+qmi = wrapToPi(qmi);
+
+ei    = qd-qs;
+eprec = ei;
+
 % Motors initial conditions
-qmi   = [0; 0];
-dqmi  = [0; 0];
+qmi = [0; 0];
+dqmi = [0; 0];
 ddqmi = [0; 0];
-umi   = [0; 0];
 
 % Bounds
 min_dq = [deg2rad(-400); deg2rad(-400)];
 max_dq = [deg2rad(400); deg2rad(400)];
-
-min_u = [-1000; -1000] / 1000;
-max_u = [1000; 1000] / 1000;
 
 % -------------------------------- %
 
@@ -67,31 +74,31 @@ q = transpose(q);
 % syms ddq [1 n] real
 % ddq = transpose(ddq);
 
-m = [m1; m2];
 % 2R robot
-Iczz = 1/12 * m.* (3*(Ia.^2 + Ib.^2).^2 + Ih.^2);
-
-a1 = Iczz(1) + Iczz(2) + m1 * d1^2 + m2 * d2^2 + m2 * l1^2;
+Ic1zz = 1;
+Ic2zz = 1;
+m = [m1; m2];
+a1 = Ic1zz + Ic2zz + m1 * d1^2 + m2 * d2^2 + m2 * l1^2;
 a2 = m2 * l1 * d2;
-a3 = Iczz(2) + m2 * d2^2;
+a3 = Ic2zz + m2 * d2^2;
 a4 = g0*(m1*d1 + m2*l1);
 a5 = g0 * m2 * d2;
 a = [a1; a2; a3; a4; a5];
 
 % Motors transmission ratio
 N = diag(nr);
-Np = inv(N);
+Np = N';
 
 % Diagonal matrix with constants elements of inertia matrix M => M = Mc + Mr
 Mc = Np * diag([a1 a3]) * Np;
 
 % Moment of inertia
-%r = [0.1 0.1];
-%J = diag([m1*r(1)^2 m2*r(2)^2] / nr.^2);
+%J = diag([1 1] / n2.^2);
 J = diag([0 0]);
 
 % Cofficients of viscuous friction of the motors
 D = diag(bl / nr.^2 + bm);
+
 
 % Disturbance
 di = [0; 0];
@@ -99,15 +106,6 @@ di = [0; 0];
 % Final equation
 % (J + Mc) ddqm + D dqm + d = taum
 
-% Angles wrapping to [-pi/2, pi/2]
-qd  = wrapToPi(qd);
-qmi = wrapToPi(qmi);
-
-% Starting error
-ei    = qd - qmi;
-eprec = ei;
-
-% Plots
 q1_plot = zeros(1,T);
 q2_plot = zeros(1,T);
 e1_plot = zeros(1,T);
@@ -117,6 +115,7 @@ dq2_plot = zeros(1,T);
 u1_plot = zeros(1,T);
 u2_plot = zeros(1,T);
 
+something = (J + Mc)'
 % Control scheme
 for i=1:dt:T
     % Plots
@@ -126,22 +125,21 @@ for i=1:dt:T
     e2_plot(i) = ei(2);
     dq1_plot(i) = dqmi(1);
     dq2_plot(i) = dqmi(2);
-    u1_plot(i) = umi(1);
-    u2_plot(i) = umi(2);
+    u1_plot(i) = ui(1);
+    u2_plot(i) = ui(2);
     
     % Current error
     ei = double(qd - qmi);
     
     % PD + FFW control, Torque of the motors
     ai = ddqd + Kd * (ei - eprec) / dt + Kp * ei;
-    umi = (J + Mc) * ai + D * dqmi + di;
-    %umi = clamp(umi, min_u, max_u); % Clamping the i-th torque
+    ui = (J + Mc) * ai + D * dqmi + di;
     
     % Updating precedent error for next derivatives
     eprec = ei;
     
     % Joints acceleration [MOTORS]
-    sum = umi - D * dqmi - di;
+    sum = ui - D * dqmi - di; % qui esplode
     ddqmi = (J + Mc)' * sum;
     
     %ddqi = clamp(ddqi, -0.05, 0.05); % clamping acceleration
