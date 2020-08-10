@@ -4,6 +4,10 @@
 
 ## Results
 
+## Usage
+__Feedback Linearization Control__  → [fbl_ctrl.m](fbl_ctrl.m)  
+__Decentralized Control__  → [d_ctrl.m](d_ctrl.m)
+
 ## Credits
 - [Riccardo Caprari](https://github.com/RickyMexx)
 - [Emanuele Giacomini](https://github.com/EmanueleGiacomini)
