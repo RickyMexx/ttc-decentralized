@@ -39,9 +39,13 @@ qi    = qs;
 dqi   = [0; 0];
 ddqi  = [0; 0];
 ui    = [0; 0];
+
+% Angles wrapping to [-pi/2, pi/2]
+qd = wrapToPi(qd);
+qi = wrapToPi(qi);
+
 ei    = qd-qs;
 eprec = ei;
-
 
 % Bounds
 min_dq = [deg2rad(-400); deg2rad(-400)];
