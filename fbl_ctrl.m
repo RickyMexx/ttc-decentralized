@@ -59,6 +59,7 @@ for i = 1:dt:T
     % Compute model's torque
     % Working in nominal conditions -> use nominal M and C, othewrise
     % estimate them
+    
     % ui = M * ai + C; 
     u = M * ai;
     ddq = double(M \ u);
@@ -69,4 +70,7 @@ for i = 1:dt:T
 end
 
 %% Display results
-data_plot(data_mat, [["ms", "rad"]; ["ms", "rad"]; ["ms", "rad/ms"]; ["ms", "rad/ms"]], 2, 2, ["q1"; "q2"; "dq1"; "dq2"]);
+%data_plot(data_mat, [["ms", "rad"]; ["ms", "rad"]; ["ms", "rad/ms"]; ["ms", "rad/ms"]], 2, 2, ["q1"; "q2"; "dq1"; "dq2"]);
+labels = [["ms", "rad"]; ["ms", "rad"]; ["ms", "rad"]; ["ms", "rad"]; ["ms", "rad/ms"]; ["ms", "rad/ms"]; ["ms", "rad/ms^2"]; ["ms", "rad/ms^2"]; ["ms", "Nm"]; ["ms", "Nm"]];
+titles = ["e1"; "e2"; "q1"; "q2"; "dq1"; "dq2"; "ddq1"; "ddq2"; "u1"; "u2"];
+data_plot(data_mat, labels, 5, 2, titles);
