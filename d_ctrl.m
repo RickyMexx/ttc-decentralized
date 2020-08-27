@@ -9,20 +9,20 @@ dt  = 1;
 idt = 1; % inve["ms", "rad"]rse dt
 
 %% 2R parameters
-m = [1; 1];
-l = [2; 2];
+m = [100; 20];
+l = [1; 1];
 d = [1; 1];
-g0 = 9.8;
+g0 = 0.0098;
 [a, m] = eval_2r_params(l, d, m, g0);
 
 % Initial conditions
-qi  = [0; 0]; % Initial joint state
+qi  = [pi; 0]; % Initial joint state
 dqi = [0; 0]; % Initial joint velocity
 ddqi= [0; 0]; % Initial joint acceleration
 ui  = [0; 0]; % Initial torque input
 % Final conditions
-qd  = [pi/2; pi/2]; % Final joint state
-dqd = [0; 0]; % Final joint velocity
+qd  = [0; pi/2]; % Final joint state
+dqd = [0; 0]; % Final joint velo city
 ddqd= [0; 0]; % Final joint acceleration
 
 % Robot variables
@@ -32,18 +32,21 @@ ddq= ddqi; % Joint Acceleration
 u  = ui;   % Torque input
 
 % Joint bounds
-min_dq = [-10; -10];
-max_dq = [10; 10];
+min_dq = [-0.01, -0.01];
+max_dq = [0.01, 0.01];
+
+min_q = [deg2rad(-360); deg2rad(-180)];
+max_q = [deg2rad(+360); deg2rad(+180)];
 
 %% Decentralized Joint Parameters
 J = diag([1., 1.]); % Inertia matrix
-D = diag([1., 1.]); % Viscous Friction matrix
-N = diag([200., 200.]); % Reduction ratio
+D = diag([0.2, 0.2]); % Viscous Friction matrix
+N = diag([1000., 400.]); % Reduction ratio
 Ni = inv(N);
 
 %% PD-Controller Parameters
-kp = 0.001 * eye(2);
-kd = 0.01  * eye(2);
+kp = 50 * eye(2);
+kd = 80  * eye(2);
 err= qd - q;
 err_prec = err;
 
@@ -67,13 +70,20 @@ for i = 1:dt:T
     ai = kd * (err - err_prec) * idt + kp * err;
     % Compute command unit
     u = (J + Mbar) * ai + D * dq + d;
-    % Update acceleration values and integrate
-    ddq = inv(J + Mbr) * (u - D * dq - d);
+    %% Update acceleration values and integrate
+    %ddq = inv(J + Mbr) * (u - D * dq - d);
+    % Update acceleration values wrt Dynamic Robot's model
+    M = eval_2r_M(a, q);
+    ddq = inv(M) * (Ni * u - C * dq - G);
+    %%
     dq  = dq + integrate(ddq, dt);
     %Constrain velocities
     dq(1) = max(min(max_dq(1), dq(1)), min_dq(1));
     dq(2) = max(min(max_dq(2), dq(2)), min_dq(2));
     q   = q  + integrate(dq, dt);    
+    % Constrain joints
+    q(1) = max(min(max_q(1), q(1)), min_q(1));
+    q(2) = max(min(max_q(2), q(2)), min_q(2));
     % Update error
     err_prec = err;
 end
