@@ -1,6 +1,4 @@
-clear all;
-% FeedBack Linearization Control
-% 2R robot w/ gravity
+clear all
 
 % Simulation time (ms)
 T = 2000;
@@ -9,17 +7,18 @@ dt  = 1;
 idt = 1; % inve["ms", "rad"]rse dt
 
 %% 2R parameters
-m = [1; 1];
-l = [2; 2];
+m = [100; 1];
+l = [1; 1];
 d = [1; 1];
-g0 = 9.8;
+g0 = 0.0098;
 [a, m] = eval_2r_params(l, d, m, g0);
+D = 1; % Coefficent of viscous friction
 
 % Initial conditions
-qi  = [0; 0]; % Initial joint state
+qi  = [-pi/2; 0]; % Initial joint state
 dqi = [0; 0]; % Initial joint velocity
 ddqi= [0; 0]; % Initial joint acceleration
-ui  = [0; 0]; % Initial torque input
+ui  = [0; 0.1]; % Initial torque input
 % Final conditions
 qd  = [pi/2; pi/2]; % Final joint state
 dqd = [0; 0]; % Final joint velocity
@@ -35,23 +34,19 @@ u  = ui;   % Torque input
 min_dq = [deg2rad(-400); deg2rad(-400)];
 max_dq = [deg2rad(400); deg2rad(400)];
 
-%% PD-Controller Parameters
-kp = 0.01 * eye(2);
-kd = 0.1  * eye(2);
-err= qd - q;
-err_prec = err;
+min_q = [deg2rad(-180); deg2rad(-180)];
+max_q = [deg2rad(+180); deg2rad(+180)];
 
 num_steps = floor(T / dt);
+
 data_mat(1:10,num_steps) = 0.0;
 
 %% Simulation phase 
 for i = 1:dt:T
     %% Update Plots
+    err = [0.0; 0.0];
     data_mat = data_store(data_mat, i, q, dq, ddq, err, u);
     %% simulate system
-    err = double(qd - q);
-    % Controller term
-    ai = kd * (err - err_prec) * idt + kp * err;
     % Compute robot's model in real time
     M = eval_2r_M(a, q);
     C = eval_2r_C(a, q, dq);
@@ -59,14 +54,20 @@ for i = 1:dt:T
     % Compute model's torque
     % Working in nominal conditions -> use nominal M and C, othewrise
     % estimate them
-    % ui = M * ai + C; 
-    u = M * ai;
-    ddq = double(M \ u);
+    % ui = M * ai + C;
+    N = C * dq + D * dq + G;
+    ddq = M \ (u - N);
     dq  = dq + integrate(ddq, dt);
+    %Constrain velocities
+    dq(1) = max(min(max_dq(1), dq(1)), min_dq(1));
+    dq(2) = max(min(max_dq(2), dq(2)), min_dq(2));
+    
     q   = q  + integrate(dq, dt);
+    % Constrain joints
+    q(1) = max(min(max_q(1), q(1)), min_q(1));
+    q(2) = max(min(max_q(2), q(2)), min_q(2));
     % Update error
     err_prec = err;
 end
-
 %% Display results
 data_plot(data_mat, [["ms", "rad"]; ["ms", "rad"]; ["ms", "rad/ms"]; ["ms", "rad/ms"]], 2, 2, ["q1"; "q2"; "dq1"; "dq2"]);
