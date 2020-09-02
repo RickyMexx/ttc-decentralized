@@ -81,8 +81,8 @@ for i = 1:dt:T
     err = double(qd - q);
     derr = (err - err_prec) * idt;
     s = gs * err + derr;
-    sat(1,1) = eval_sat(s(1), phi(1));
-    sat(2,1) = eval_sat(s(2), phi(2));
+    sat(1,1) = eval_2r_sat(s(1), phi(1));
+    sat(2,1) = eval_2r_sat(s(2), phi(2));
     % PD + Sliding Mode
     ai = kd * derr + kp * err + ks * sat;
     % Compute command unit
