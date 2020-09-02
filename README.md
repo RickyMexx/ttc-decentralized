@@ -6,8 +6,8 @@
 
 ## Usage
 __Feedback Linearization Control__  → [fbl_ctrl.m](fbl_ctrl.m)  
-__Decentralized Control + PD__  → [d_ctrl.m](d_ctrl.m)
-__Decentralized Control + PD + Sliding Mode__  → [dsm_ctrl.m](d_ctrl.m)
+__Decentralized Control + PD__  → [d_ctrl.m](d_ctrl.m)  
+__Decentralized Control + PD + Sliding Mode__  → [dsm_ctrl.m](d_ctrl.m)  
 
 ## Credits
 - [Riccardo Caprari](https://github.com/RickyMexx)
