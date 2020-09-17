@@ -7,9 +7,12 @@ function [a, m] = eval_2r_params_real(l, d, m, g, err)
 %     g : gravity component
 %   err : nominal-real factor
 
-m = m + err;
-l = l + err;
-d = d + err;
+m(1) = m(1) + 2 * err;
+m(2) = m(2) - 2 * err;
+l(1) = l(1) - err;
+l(2) = l(2) + err;
+d(1) = d(1) + err;
+d(2) = d(2) - err;
 
 a(1:5) = 0.0;
 a(1) = m(1) * d(1)^2 + m(2) * d(2)^2 + m(2) * l(1)^2;
