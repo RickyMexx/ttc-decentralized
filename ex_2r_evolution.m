@@ -7,7 +7,7 @@ dt  = 1;
 idt = 1; % inve["ms", "rad"]rse dt
 
 %% 2R parameters
-m = [100; 1];
+m = [10; 1];
 l = [1; 1];
 d = [1; 1];
 g0 = 0.0098;
@@ -15,10 +15,10 @@ g0 = 0.0098;
 D = 1; % Coefficent of viscous friction
 
 % Initial conditions
-qi  = [-pi/2; 0]; % Initial joint state
+qi  = [0; 0]; % Initial joint state
 dqi = [0; 0]; % Initial joint velocity
 ddqi= [0; 0]; % Initial joint acceleration
-ui  = [0; 0.1]; % Initial torque input
+ui  = [0; 0]; % Initial torque input
 % Final conditions
 qd  = [pi/2; pi/2]; % Final joint state
 dqd = [0; 0]; % Final joint velocity
@@ -34,18 +34,18 @@ u  = ui;   % Torque input
 min_dq = [deg2rad(-400); deg2rad(-400)];
 max_dq = [deg2rad(400); deg2rad(400)];
 
-min_q = [deg2rad(-180); deg2rad(-180)];
-max_q = [deg2rad(+180); deg2rad(+180)];
+min_q = [deg2rad(-180); deg2rad(-60)];
+max_q = [deg2rad(+180); deg2rad(+60)];
 
 num_steps = floor(T / dt);
 
-data_mat(1:10,num_steps) = 0.0;
+data_mat(1:12,num_steps) = 0.0;
 
 %% Simulation phase 
 for i = 1:dt:T
     %% Update Plots
     err = [0.0; 0.0];
-    data_mat = data_store(data_mat, i, q, dq, ddq, err, u);
+    data_mat = data_store(data_mat, i, q, dq, ddq, err, u, qd);
     %% simulate system
     % Compute robot's model in real time
     M = eval_2r_M(a, q);
@@ -61,7 +61,6 @@ for i = 1:dt:T
     %Constrain velocities
     dq(1) = max(min(max_dq(1), dq(1)), min_dq(1));
     dq(2) = max(min(max_dq(2), dq(2)), min_dq(2));
-    
     q   = q  + integrate(dq, dt);
     % Constrain joints
     q(1) = max(min(max_q(1), q(1)), min_q(1));
@@ -70,4 +69,6 @@ for i = 1:dt:T
     err_prec = err;
 end
 %% Display results
-data_plot(data_mat, [["ms", "rad"]; ["ms", "rad"]; ["ms", "rad/ms"]; ["ms", "rad/ms"]], 2, 2, ["q1"; "q2"; "dq1"; "dq2"]);
+labels = [["ms", "rad"]; ["ms", "rad"]; ["ms", "rad"]; ["ms", "rad"]; ["ms", "rad/ms"]; ["ms", "rad/ms"]; ["ms", "rad/ms^2"]; ["ms", "rad/ms^2"]; ["ms", "Nm"]; ["ms", "Nm"]];
+titles = ["e1"; "e2"; "q1"; "q2"; "dq1"; "dq2"; "ddq1"; "ddq2"; "u1"; "u2"];
+data_plot(data_mat, labels, 5, 2, titles);
