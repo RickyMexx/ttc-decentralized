@@ -1,4 +1,4 @@
-clear all;
+ clear all;
 % Decentralized Control
 % 2R robot w/ gravity
 
@@ -58,6 +58,7 @@ err = qd - q;
 Kr = diag([1 0.1]);
 
 % Eigenvalues
+%P = [-1 -1.2 -1.3 -1.4];
 P = [-1 -1.2 -1.3 -1.4];
 
 % State equations
