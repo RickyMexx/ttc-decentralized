@@ -1,4 +1,4 @@
-function u = controller_decentralized(q, dq, ddq, a, D, N, kp, kd, err, err_prec)
+function u = controller_d(q, dq, ddq, a, D, N, kp, kd, err, err_prec)
 %CONTROLLER_DECENTRALIZED Decentralized controller
 %[q,dq,ddq] : Robot State variables 
 %       a   : Robot Dynamic coefficients

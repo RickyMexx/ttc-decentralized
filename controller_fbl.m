@@ -1,4 +1,4 @@
-function u = controller_centralized_fbl(q, dq, ddq, a, D, N, kp, kd, err, err_prec)
+function u = controller_fbl(q, dq, ddq, a, D, N, kp, kd, err, err_prec)
 %CONTROLLER_DECENTRALIZED Decentralized controller extended with non-linear
 %estimate
 %[q,dq,ddq] : Robot State variables 
