@@ -6,9 +6,17 @@ function u = controller_pp_sm(q, dq, ddq, a, D, N, qd, err, derr)
 %       D   : Viscous Friction matrix
 %       N   : gear-ratio matrix
 %      qd   : Desired joint position
-[Mbar, ~] = eval_2r_M_decomp(a, q);
+[Mbar, dM] = eval_2r_M_decomp(a, q);
 Mbr = N\Mbar/N;
 Dbr = N\D/N;
+
+C = eval_2r_C(a, q, dq);
+G = eval_2r_G(a, q);
+Ni = N \ eye(2);
+dqm = N * dq;
+ddqm = N * ddq;
+%d = Ni * dM * Ni * ddqm + Ni * C * Ni * dqm + Ni * G;
+d = 0;
 
 A = [zeros(2), eye(2); zeros(2), - inv(Mbr) * Dbr];
 B = [zeros(2); inv(Mbr)];
@@ -31,7 +39,7 @@ sat(1,1) = eval_2r_sat(s(1), phi(1));
 sat(2,1) = eval_2r_sat(s(2), phi(2));
 
 %% Final command
-um = -K * x + Ks * sat + Kr * qd;
+um = -K * x + Ks * sat + Kr * qd + d;
 u = N * um;
 end
 
