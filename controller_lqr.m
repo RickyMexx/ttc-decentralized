@@ -1,4 +1,4 @@
-function u = controller_pp(q, dq, ddq, a, D, N, qd)
+function u = controller_lqr(q, dq, ddq, a, D, N, qd, erj)
 %CONTROLLER_PP Pole Placement controller
 %estimate
 %[q,dq,ddq] : Robot State variables 
@@ -6,38 +6,34 @@ function u = controller_pp(q, dq, ddq, a, D, N, qd)
 %       D   : Viscous Friction matrix
 %       N   : gear-ratio matrix
 %      qd   : Desired joint position
-%[Mbar, ~] = eval_2r_M_decomp(a, q);
+%      erj  : Error Rejection flag
 [Mbar, dM] = eval_2r_M_decomp(a, q);
 Mbr = N\Mbar/N;
 Dbr = N\D/N;
 
-C = eval_2r_C(a, q, dq);
-G = eval_2r_G(a, q);
 Ni = N \ eye(2);
 dqm = N * dq;
 ddqm = N * ddq;
-%d = Ni * dM * Ni * ddqm + Ni * C * Ni * dqm + Ni * G;
-d = 0;
 
+if erj == true
+    C = eval_2r_C(a, q, dq);
+    G = eval_2r_G(a, q);    
+    d = Ni * dM * Ni * ddqm + Ni * C * Ni * dqm + Ni * G;
+else
+    d = 0;
+end
+
+% State Space matrices
 A = [zeros(2), eye(2); zeros(2), - inv(Mbr) * Dbr];
 B = [zeros(2); inv(Mbr)];
-%Cs = eye(4);
 
-P = [-1.5, -1.1, -1.2, -1.5];
+Q = eye(4) * 0.5;
+R = eye(2) * 2;
 
-K = place(A, B, P);
+[K, ~, ~] = lqr(A, B, Q, R);
 Kr = diag([4.5, 0.6]);
-% Automatic Kr computation (Buggy AF!)
-%Acl = A - B*K;
-%syscl = ss(Acl, B, Cs, [zeros(2); zeros(2)]);
-%Kdc = dcgain(syscl);
-%Kr = diag([1 / Kdc(1, 1), 1 / Kdc(2, 2)]);
-%disp(Kr);
-
 
 x = [N\q; N\dq];
-
 um = Kr * qd - K * x + d;
 u = N * um;
 end
-

@@ -31,7 +31,7 @@ x = [N\q; N\dq];
 %% Sliding Mode
 gs = diag([2 2]); % Weight of error for the sliding surface
 phi = [1 1]; % Boundary layers
-Ks = diag([10.2 0.3]); % Gain of the robust term
+Ks = diag([10.2 0.4]); % Gain of the robust term
 
 % Sliding surface + saturation
 s = gs * err + derr;
