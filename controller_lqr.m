@@ -27,13 +27,18 @@ end
 A = [zeros(2), eye(2); zeros(2), - inv(Mbr) * Dbr];
 B = [zeros(2); inv(Mbr)];
 
-Q = eye(4) * 0.5;
-R = eye(2) * 2;
+Q = [1, 0, 0, 0;  % dq1
+     0, 1, 0, 0;  % dq2
+     0, 0, 1, 0;  % ddq1
+     0, 0, 0, 1]; % ddq2
+R = [2, 0;  % u1
+     0, 2]; % u2
 
 [K, ~, ~] = lqr(A, B, Q, R);
-Kr = diag([4.5, 0.6]);
+Kr = diag([0.1, 5]);
 
 x = [N\q; N\dq];
-um = Kr * qd - K * x + d;
+%um = Kr * qd - K * x + d;
+um = K * x;
 u = N * um;
 end
