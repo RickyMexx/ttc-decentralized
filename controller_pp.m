@@ -21,13 +21,14 @@ d = 0;
 
 A = [zeros(2), eye(2); zeros(2), - inv(Mbr) * Dbr];
 B = [zeros(2); inv(Mbr)];
-%Cs = eye(4);
 
-P = [-1.5, -1.1, -1.2, -1.5];
+
+P = [-1.8, -1.9, -1.1, -1.4];
 
 K = place(A, B, P);
-Kr = diag([4.5, 0.6]);
+Kr = diag([5.2, 2.25]);
 % Automatic Kr computation (Buggy AF!)
+%Cs = eye(4);
 %Acl = A - B*K;
 %syscl = ss(Acl, B, Cs, [zeros(2); zeros(2)]);
 %Kdc = dcgain(syscl);
@@ -38,6 +39,8 @@ Kr = diag([4.5, 0.6]);
 x = [N\q; N\dq];
 
 um = Kr * qd - K * x + d;
+%disp(-K * x);
+%um = - K * x;
 u = N * um;
 end
 
