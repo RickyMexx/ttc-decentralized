@@ -1,4 +1,4 @@
-function u = controller_pp(q, dq, ddq, a, D, N, P, Kr, err, derr, qd)
+function u = controller_pp(q, dq, ddq, a, D, N, P, Kr, qd, dqd)
 %CONTROLLER_PP Pole Placement controller
 %estimate
 %[q,dq,ddq] : Robot State variables 
@@ -16,8 +16,8 @@ B = [zeros(2); inv(Mbr)];
 
 K = place(A, B, P);
 
-%x = [N\(q - qd); N\dq];
-x = [N\(q-qd); 0; 0];
+x = [N\(q - qd); N\(dq - dqd)];
+%x = [N\(q-qd); 0; 0];
 um = Kr * qd - K * x;
 u = N * um;
 end

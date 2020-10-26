@@ -22,13 +22,15 @@ G = eval_2r_G(a, q);
 
 
 ddq = M\(u - (C + D) * dq - G);
-%ddq(1) = max(min(ddq_constraints(1, 2), ddq(1)), ddq_constraints(1, 1));
-%ddq(2) = max(min(ddq_constraints(2, 2), ddq(2)), ddq_constraints(2, 1));
+% Constrain Accelerations
+ddq(1) = max(min(ddq_constraints(1, 2), ddq(1)), ddq_constraints(1, 1));
+ddq(2) = max(min(ddq_constraints(2, 2), ddq(2)), ddq_constraints(2, 1));
 dq = dq + integrate(ddq, dt);
 % Constrain Velocities
-%dq(1) = max(min(dq_constraints(1, 2), dq(1)), dq_constraints(1, 1));
-%dq(2) = max(min(dq_constraints(2, 2), dq(2)), dq_constraints(2, 1));
+dq(1) = max(min(dq_constraints(1, 2), dq(1)), dq_constraints(1, 1));
+dq(2) = max(min(dq_constraints(2, 2), dq(2)), dq_constraints(2, 1));
 q = q + integrate(dq, dt);
+% Constrain Joint motions
 q(1) = max(min(q_constraints(1, 2), q(1)), q_constraints(1, 1));
 q(2) = max(min(q_constraints(2, 2), q(2)), q_constraints(2, 1));
 end

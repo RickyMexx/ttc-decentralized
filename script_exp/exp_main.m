@@ -1,9 +1,10 @@
 %% Experiment Regularization with Nominal parameters
 clc
+addpath('lib_2r', 'lib_ctrl', 'lib_utils', 'script_exp');
 % USED CONTROLLER
-USED_CTRL = 'pp';
+USED_CTRL = 'lqr';
 % Simulation time (ms)
-T = 500;
+T = 1999;
 % Simulation step (ms)
 dt  = 1;
 idt = 1;
@@ -30,8 +31,8 @@ N = diag([4, 4]); % Reduction Ratio
 D = diag([1., 1.]); % Viscous Friction Matrix
 
 ddqconstr = [
-    -2.0, 2.0;
-    -2.0, 2.0
+    -5.0, 5.0;
+    -5.0, 5.0
     ];
 
 dqconstr = [
@@ -53,19 +54,20 @@ nr = 0.0; % Nominal-Real additive factor for real parameters
 [ar, mr] = eval_2r_params_real(l, d, m, g0, nr);
 Dr = D - diag([nr / 5, -nr / 5]); % Real Viscous Friction Matrix
 %% PD-Controller Parameters
-% FBL good parameters
+% FBL parameters
 kp_fbl = 0.05  * eye(2);
 kd_fbl = 1.0 * eye(2);
-% PD good parameters
-kp_pd = 1.55  * eye(2);
-kd_pd = 2.5 * eye(2);
+% PD parameters
+kp_pd = 1.  * eye(2);
+kd_pd = 3 * eye(2);
 err= qd - q;
 err_prec = err;
 %% PP-Controller Parameters
 P_pp = [-1.3, -1.5, -1.1, -1.8];
-Kr_pp = diag([0.12, 0.005]);
-P_pp_er = [-.3, -.5, -.1, -.8];
-Kr_pp_er = diag([0.0, 0.0]);
+P_pp_er = [-.8, -.4, -.1, -.6];
+%% LQR-Controller Parameters
+Q = diag([1, 1, 1, 1]); % dq1 dq2 ddq1 ddq2 
+R = diag([2, 2.0]); % u1 u2
 %% Simulation Phase
 num_steps = floor(T / dt);
 % Insert all elements that must be stored
@@ -87,6 +89,10 @@ for i = 1:dt:T
     data_qd(1:2, i) = qd;
     data_err(1:2, i) = err;
     data_u(1:2, i) = u;
+    % Tracking qd update
+    dqd = [1e-2 * cos(i / 100); -.5e-2 * sin(i / 50)];
+    qd = qd + integrate(dqd, dt);
+    %qd = [sin(i / 100); cos(i / 50)];
     % Update control term
     err = double(qd - q);
     derr = (err - err_prec) * idt;
@@ -94,13 +100,13 @@ for i = 1:dt:T
         case 'fbl'
             u = controller_fbl(q, dq, ddq, ar, D, N, kp_fbl, kd_fbl, err, err_prec);
         case 'pp'
-            u = controller_pp(q, dq, ddq, ar, D, N, P_pp, Kr_pp, err, derr, qd);
+            u = controller_pp(q, dq, ddq, ar, D, N, P_pp, Kr_pp, qd, dqd);
         case 'pp_er'
-            u = controller_pp_er(q, dq, ddq, ar, D, N, P_pp_er, Kr_pp_er, err, derr, qd);
+            u = controller_pp_er(q, dq, ddq, ar, D, N, P_pp_er, Kr_pp_er, qd, dqd);
         case 'pd'
             u = controller_pd(q, dq, ddq, ar, D, N, kp_pd, kd_pd, err, err_prec);
         case 'lqr'
-            u = controller_lqr(q, dq, ddq, ar, D, N, qd, false);
+            u = controller_lqr(q, dq, ddq, ar, D, N, Q, R, qd, dqd);
     end    
     % Clamp u
     %u(1) = max(min(uconstr(1, 2), u(1)), uconstr(1, 1));
