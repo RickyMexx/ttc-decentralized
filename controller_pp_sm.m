@@ -22,16 +22,26 @@ A = [zeros(2), eye(2); zeros(2), - inv(Mbr) * Dbr];
 B = [zeros(2); inv(Mbr)];
 
 % Choosing poles and placing them
-P = [-1.5, -1.1, -1.2, -1.5];
-K = place(A, B, P);
-Kr = diag([5.5, 0.8]);
 
-x = [N\q; N\dq];
+
+
+x = [N\err; N\derr];
 
 %% Sliding Mode
-gs = diag([2 2]); % Weight of error for the sliding surface
+%% Tracking NOMINAL
+%gs = diag([1 1]); % Weight of error for the sliding surface
+%phi = [1 1]; % Boundary layers
+%Ks = diag([1.6 0.16]); % Gain of the robust term
+%P = [-3.3, -3.5, -5.6, -4.4];
+%Kr = diag([3.35, 0.335]);
+%K = place(A, B, P);
+%% Tracking REAL
+gs = diag([1 1]); % Weight of error for the sliding surface
 phi = [1 1]; % Boundary layers
-Ks = diag([10.2 0.4]); % Gain of the robust term
+Ks = diag([0.8 0.25]); % Gain of the robust term
+P = [-4.6, -4.3, -4.5, -6.4];
+Kr = diag([9, 0.25]);
+K = place(A, B, P);
 
 % Sliding surface + saturation
 s = gs * err + derr;

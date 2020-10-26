@@ -1,7 +1,7 @@
 %% Experiment Regularization with Nominal parameters
 clc
 % USED CONTROLLER
-USED_CTRL = 'pd';
+USED_CTRL = 'pp';
 % Simulation time (ms)
 T = 2000;
 % Simulation step (ms)
@@ -21,9 +21,13 @@ dq = dqi;  % Joint velocity
 ddq= ddqi; % Joint Acceleration
 u  = ui;   % Torque input
 %% 2R Parameters
-m = [20; 20];
-l = [10; 10];
-d = [5; 5];
+%m = [20; 20];
+%l = [2; 2];
+%d = [1; 1];
+%% FOR LQR
+m = [30; 15];
+l = [1; 1];
+d = [0.5; 0.5];
 g0 = 0.00981;
 
 N = diag([10, 10]); % Reduction Ratio
@@ -53,8 +57,8 @@ Dr = D - diag([nr / 5, -nr / 5]); % Real Viscous Friction Matrix
 %kp = 0.05  * eye(2);
 %kd = 1.0 * eye(2);
 % PD good parameters
-kp = 40  * eye(2);
-kd = 20 * eye(2);
+kp = 2  * eye(2);
+kd = 2 * eye(2);
 err= qd - q;
 err_prec = err;
 %% Simulation Phase
@@ -80,13 +84,24 @@ for i = 1:dt:T
     data_u(1:2, i) = u;
     % Update control term
     err = double(qd - q);
+    derr = (err - err_prec) * idt;
     switch USED_CTRL
         case 'fbl'
             u = controller_fbl(q, dq, ddq, ar, D, N, kp, kd, err, err_prec);
         case 'pp'
+            u = controller_pp(q, dq, ddq, ar, D, N, err, derr);
+        case 'pp_er'
             u = controller_pp(q, dq, ddq, ar, D, N, qd);
         case 'pd'
-            u = controller_pd(q, dq, ddq, ar, D, N, kp, kd, err, err_prec);
+            u = controller_dext(q, dq, ddq, ar, D, N, kp, kd, err, err_prec);
+        case 'lqr_01'
+            u = controller_lqr(q, dq, ddq, ar, D, N, qd, false);
+        case 'lqr_02'
+            u = controller_lqr(q, dq, ddq, ar, D, N, qd, false);
+        case 'lqr_03'
+            u = controller_lqr(q, dq, ddq, ar, D, N, qd, false);
+        case 'lqr_04'
+            u = controller_lqr(q, dq, ddq, ar, D, N, qd, false);
     end    
     % Clamp u
     u(1) = max(min(uconstr(1, 2), u(1)), uconstr(1, 1));
@@ -110,7 +125,7 @@ titles = ["e1"; "e2"; "q1"; "q2"; "dq1"; "dq2"; "ddq1"; "ddq2"; "u1"; "u2"];
 data_plot(data_mat, labels, 5, 2, titles);
 
 %% Store experimental data and images
-writetable(T, "data/exp_reg_nom_" + USED_CTRL + ".csv");
-saveas(gcf, "images/exp_reg_nom_" + USED_CTRL + ".fig");
+%writetable(T, "data/exp_reg_nom_" + USED_CTRL + ".csv");
+%saveas(gcf, "images/exp_reg_nom_" + USED_CTRL + ".fig");
 
 

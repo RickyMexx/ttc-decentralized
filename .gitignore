@@ -19,3 +19,7 @@ octave-workspace
 
 # Simulink autosave extension
 .autosave
+
+data/
+images/
+old_scripts/

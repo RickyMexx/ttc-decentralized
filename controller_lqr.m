@@ -26,21 +26,21 @@ end
 % State Space matrices
 A = [zeros(2), eye(2); zeros(2), - inv(Mbr) * Dbr];
 B = [zeros(2); inv(Mbr)];
-Cs = eye(4);
 
-Q = [50, 0, 0, 0;  % q1
-     0, 50, 0, 0;  % q2
-     0, 0, 50, 0;  % dq1
-     0, 0, 0, 50]; % dq2
-R = [0.1, 0;  % u1
-     0, 0.1]; % u2
+Q = [1, 0, 0, 0;  % dq1
+     0, 1, 0, 0;  % dq2
+     0, 0, 1, 0;  % ddq1
+     0, 0, 0, 1]; % ddq2
+R = [1, 0;  % u1
+     0, 1]; % u2
 
 [K, ~, ~] = lqr(A, B, Q, R);
-Kr = diag([2.5, 2.5]);
-
+%Kr = diag([1, 1]);
+Kp = diag([0.19, 0.19]);
 x = [N\q; N\dq];
 
+um = Kp * (qd-q) - K * x + d;
 %um = Kr * qd - K * x + d;
-um = -K * x;
+%um = K * x;
 u = N * um;
 end

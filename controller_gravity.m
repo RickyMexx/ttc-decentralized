@@ -1,5 +1,5 @@
-function u = controller_fbl(q, dq, ddq, a, D, N, kp, kd, err, err_prec)
-%CONTROLLER_DECENTRALIZED Decentralized controller extended with non-linear
+function u = controller_gravity(q, dq, ddq, a, D, N, kp, kd, err, err_prec)
+%CONTROLLER_GRAVITY compensate both gravity and coulomb frictions
 %estimate
 %[q,dq,ddq] : Robot State variables 
 %       a   : Robot Dynamic coefficients
@@ -15,12 +15,9 @@ function u = controller_fbl(q, dq, ddq, a, D, N, kp, kd, err, err_prec)
 % [305, (8.2)] N * q = qm
 % [306, (8.3)] inv(N) * t = tm
 
-ud = kp * err + kd * (err - err_prec);
-M = eval_2r_M(a, q);
 C = eval_2r_C(a, q, dq);
 G = eval_2r_G(a, q);
 
-u = M * ud + C * dq + D * dq + G;
-%u = M * (kd * (err- err_prec)) + C * dq + D * dq + G;
+u = C * dq + D * dq + G;
 
 end

@@ -1,7 +1,7 @@
 %% Experiment Regularization with Real parameters
 clc
 % USED CONTROLLER
-USED_CTRL = 'lqr';
+USED_CTRL = 'fbl';
 % Simulation time (ms)
 T = 2000;
 % Simulation step (ms)
@@ -21,13 +21,9 @@ dq = dqi;  % Joint velocity
 ddq= ddqi; % Joint Acceleration
 u  = ui;   % Torque input
 %% 2R Parameters
-%m = [20; 20];
-%l = [2; 2];
-%d = [1; 1];
-%% FOR LQR
-m = [30; 15];
-l = [1; 1];
-d = [0.5; 0.5];
+m = [20; 20];
+l = [10; 10];
+d = [5; 5];
 g0 = 0.00981;
 
 N = diag([10, 10]); % Reduction Ratio
@@ -48,17 +44,17 @@ uconstr = [
     -5.0, 5.0
     ];
 
-nr = 2.5; % Nominal-Real additive factor for real parameters
+nr = 1; % Nominal-Real additive factor for real parameters
 [a, m] = eval_2r_params(l, d, m, g0);
 [ar, mr] = eval_2r_params_real(l, d, m, g0, nr);
 Dr = D - diag([nr / 5, -nr / 5]); % Real Viscous Friction Matrix
 %% PD-Controller Parameters
 % FBL good parameters
-%kp = 0.05  * eye(2);
-%kd = 1.0 * eye(2);
+kp = 0.05  * eye(2);
+kd = 1.0 * eye(2);
 % PD good parameters
-kp = 2  * eye(2);
-kd = 2 * eye(2);
+%kp = 40  * eye(2);
+%kd = 20 * eye(2);
 err= qd - q;
 err_prec = err;
 %% Simulation Phase
@@ -86,21 +82,17 @@ for i = 1:dt:T
     err = double(qd - q);
     switch USED_CTRL
         case 'fbl'
-            u = controller_fbl(q, dq, ddq, ar, D, N, kp, kd, err, err_prec);
-        case 'pp_er'
-            u = controller_pp(q, dq, ddq, ar, D, N, qd);            
+            u = controller_fbl(q, dq, ddq, a, D, N, kp, kd, err, err_prec);
         case 'pp'
             u = controller_pp(q, dq, ddq, ar, D, N, qd);
         case 'pd'
-            u = controller_dext(q, dq, ddq, ar, D, N, kp, kd, err, err_prec);
-        case 'lqr'
-            u = controller_lqr(q, dq, ddq, ar, D, N, qd, false);
+            u = controller_pd(q, dq, ddq, ar, D, N, kp, kd, err, err_prec);
     end    
     % Clamp u
     u(1) = max(min(uconstr(1, 2), u(1)), uconstr(1, 1));
     u(2) = max(min(uconstr(2, 2), u(2)), uconstr(2, 1));
     % Step the model
-    [q, dq, ddq] = step_2r_model(dt, q, dq, u, a, Dr, qconstr, dqconstr);
+    [q, dq, ddq] = step_2r_model(dt, q, dq, u, ar, Dr, qconstr, dqconstr);
     err_prec = err;    
 end
 
@@ -118,7 +110,7 @@ titles = ["e1"; "e2"; "q1"; "q2"; "dq1"; "dq2"; "ddq1"; "ddq2"; "u1"; "u2"];
 data_plot(data_mat, labels, 5, 2, titles);
 
 %% Store experimental data and images
-writetable(T, "data/exp_reg_real_" + USED_CTRL + ".csv");
-saveas(gcf, "images/exp_reg_real_" + USED_CTRL + ".fig");
+writetable(T, "data/exp_reg_real_" + USED_CTRL + "_small" + ".csv");
+saveas(gcf, "images/exp_reg_real_" + USED_CTRL + "_small" + ".fig");
 
 

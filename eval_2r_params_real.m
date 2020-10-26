@@ -7,12 +7,15 @@ function [a, m] = eval_2r_params_real(l, d, m, g, err)
 %     g : gravity component
 %   err : nominal-real factor
 
-m(1) = m(1) + 2 * err;
-m(2) = m(2) - 2 * err;
-l(1) = l(1) - err;
-l(2) = l(2) + err;
-d(1) = d(1) + err;
-d(2) = d(2) - err;
+rng(42); % Random number generator with initialized seed
+err_vect = normrnd(0, 1, [1,6]) * err;
+
+m(1) = m(1) + err_vect(1);
+m(2) = m(2) + err_vect(2);
+l(1) = l(1) + err_vect(3);
+l(2) = l(2) + err_vect(4);
+d(1) = d(1) + err_vect(5);
+d(2) = d(2) + err_vect(6);
 
 I1zz = (1 / 12) * m(1) * l(1) ^ 2;
 I2zz = (1 / 12) * m(2) * l(2) ^ 2;

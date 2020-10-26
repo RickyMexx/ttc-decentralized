@@ -16,14 +16,14 @@ qd  = [0; 0]; % Final joint state
 dqd = [0; 0]; % Final joint velo city
 ddqd= [0; 0]; % Final joint acceleration
 % Robot variables
-q  = qi;   % Joint state (variable)
+q  = qi;   % Joint state (variab le)
 dq = dqi;  % Joint velocity
 ddq= ddqi; % Joint Acceleration
 u  = ui;   % Torque input
-%% 2R Parameters
+%% 2R Parameters 
 m = [20; 20];
-l = [10; 10];
-d = [5; 5];
+l = [2; 2];
+d = [1; 1];
 g0 = 0.00981;
 
 N = diag([10, 10]); % Reduction Ratio
@@ -53,8 +53,8 @@ Dr = D - diag([nr / 5, -nr / 5]); % Real Viscous Friction Matrix
 %kp = 0.05  * eye(2);
 %kd = 1.0 * eye(2);
 % PD good parameters
-kp = 50  * eye(2);
-kd = 40 * eye(2);
+kp = 2  * eye(2);
+kd = 2 * eye(2);
 err= qd - q;
 err_prec = err;
 %% Simulation Phase
@@ -87,8 +87,13 @@ for i = 1:dt:T
             u = controller_fbl(q, dq, ddq, ar, D, N, kp, kd, err, err_prec);
         case 'pp'
             u = controller_pp(q, dq, ddq, ar, D, N, qd);
+        case 'pp_er'
+            u = controller_pp(q, dq, ddq, ar, D, N, qd);
+        case 'pp_sm'
+            u = controller_pp_sm(q, dq, ddq, ar, Dr, N, qd, err, err_prec);
         case 'pd'
-            u = controller_pd(q, dq, ddq, ar, D, N, kp, kd, err, err_prec);
+            %u = controller_pd(q, dq, ddq, ar, D, N, kp, kd, err, err_prec);
+            u = controller_dext(q, dq, ddq, ar, D, N, kp, kd, err, err_prec);
     end    
     % Clamp u
     u(1) = max(min(uconstr(1, 2), u(1)), uconstr(1, 1));
