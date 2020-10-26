@@ -1,9 +1,9 @@
 %% Experiment Regularization with Nominal parameters
 clc
 % USED CONTROLLER
-USED_CTRL = 'pp_er';
+USED_CTRL = 'pp';
 % Simulation time (ms)
-T = 100;
+T = 500;
 % Simulation step (ms)
 dt  = 1;
 idt = 1;
@@ -26,7 +26,7 @@ l = [1; 1];
 d = [0.5; 0.5];
 g0 = 0.00981;
 
-N = diag([10, 10]); % Reduction Ratio
+N = diag([4, 4]); % Reduction Ratio
 D = diag([1., 1.]); % Viscous Friction Matrix
 
 ddqconstr = [
@@ -62,10 +62,10 @@ kd_pd = 2.5 * eye(2);
 err= qd - q;
 err_prec = err;
 %% PP-Controller Parameters
-P_pp = [-1.2, -1.3, -1.5, -1.8];
-Kr_pp = diag([0., 0.]);
-P_pp_er = [-1.8, -1.6, -1.5, -1.8];
-Kr_pp_er = diag([0., 0.]);
+P_pp = [-1.3, -1.5, -1.1, -1.8];
+Kr_pp = diag([0.12, 0.005]);
+P_pp_er = [-.3, -.5, -.1, -.8];
+Kr_pp_er = diag([0.0, 0.0]);
 %% Simulation Phase
 num_steps = floor(T / dt);
 % Insert all elements that must be stored
@@ -103,8 +103,8 @@ for i = 1:dt:T
             u = controller_lqr(q, dq, ddq, ar, D, N, qd, false);
     end    
     % Clamp u
-    u(1) = max(min(uconstr(1, 2), u(1)), uconstr(1, 1));
-    u(2) = max(min(uconstr(2, 2), u(2)), uconstr(2, 1));
+    %u(1) = max(min(uconstr(1, 2), u(1)), uconstr(1, 1));
+    %u(2) = max(min(uconstr(2, 2), u(2)), uconstr(2, 1));
     % Step the model
     [q, dq, ddq] = step_2r_model(dt, q, dq, u, a, Dr, qconstr, dqconstr, ddqconstr);
     err_prec = err;    

@@ -16,7 +16,8 @@ B = [zeros(2); inv(Mbr)];
 
 K = place(A, B, P);
 
-x = [N\q; N\dq];
+%x = [N\(q - qd); N\dq];
+x = [N\(q-qd); 0; 0];
 um = Kr * qd - K * x;
 u = N * um;
 end
