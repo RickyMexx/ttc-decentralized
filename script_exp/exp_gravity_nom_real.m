@@ -21,14 +21,17 @@ dq = dqi;  % Joint velocity
 ddq= ddqi; % Joint Acceleration
 u  = ui;   % Torque input
 %% 2R Parameters
-m = [20; 20];
-l = [2; 2];
-d = [1; 1];
+m = [10; 10];
+l = [1; 1];
+d = [0.5; 0.5];
 g0 = 0.00981;
-
-N = diag([10, 10]); % Reduction Ratio
+N = diag([4, 4]); % Reduction Ratio
 D = diag([1., 1.]); % Viscous Friction Matrix
-J = diag([1., 1.]); % Inertia Matrix
+
+ddqconstr = [
+    -5.0, 5.0;
+    -5.0, 5.0
+    ];
 
 dqconstr = [
     -5.01, 5.01;
@@ -44,7 +47,7 @@ uconstr = [
     -5.0, 5.0
     ];
 
-nr = 0.001; % Nominal-Real additive factor for real parameters
+nr = 0.00; % Nominal-Real additive factor for real parameters
 [a, m] = eval_2r_params(l, d, m, g0);
 [ar, mr] = eval_2r_params_real(l, d, m, g0, nr);
 Dr = D - diag([nr / 5, -nr / 5]); % Real Viscous Friction Matrix
@@ -96,7 +99,7 @@ for i = 1:dt:T
     u(1) = max(min(uconstr(1, 2), u(1)), uconstr(1, 1));
     u(2) = max(min(uconstr(2, 2), u(2)), uconstr(2, 1));
     % Step the model
-    [q, dq, ddq] = step_2r_model(dt, q, dq, u, a, Dr, qconstr, dqconstr);
+    [q, dq, ddq] = step_2r_model(dt, q, dq, u, a, Dr, qconstr, dqconstr, ddqconstr);
     err_prec = err;    
 end
 
@@ -114,7 +117,7 @@ titles = ["e1"; "e2"; "q1"; "q2"; "dq1"; "dq2"; "ddq1"; "ddq2"; "u1"; "u2"];
 data_plot(data_mat, labels, 5, 2, titles);
 
 %% Store experimental data and images
-writetable(T, "data/exp_gravity_real" + ".csv");
-saveas(gcf, "images/exp_gravity_real" + ".fig");
+writetable(T, "data/exp_gravity_nom" + ".csv");
+saveas(gcf, "images/exp_gravity_nom" + ".fig");
 
 

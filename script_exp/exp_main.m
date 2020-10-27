@@ -1,10 +1,10 @@
 %% Experiment Regularization with Nominal parameters
 clc
-%addpath('lib_2r', 'lib_ctrl', 'lib_utils', 'script_exp');
+addpath('lib_2r', 'lib_ctrl', 'lib_utils', 'script_exp');
 % USED CONTROLLER
-USED_CTRL = 'pp_sm';
+USED_CTRL = 'free';
 % EXPERIMENT TYPE
-EXP_TYPE = 'track';
+EXP_TYPE = 'reg';
 EXP_COND = 'nom';
 % Simulation time (ms)
 T = 2000;
@@ -123,6 +123,8 @@ for i = 1:dt:T
             u = controller_lqr(q, dq, ddq, ar, D, N, Q, R, qd, dqd);
         case 'pp_sm'
             u = controller_pp_sm(q, dq, ddq, a, D, N, gs_sm, phi_sm, Ks_sm, P_sm, qd, dqd, err, derr);
+        case 'free'
+            u = [0;0];
     end    
     % Clamp u
     u(1) = max(min(uconstr(1, 2), u(1)), uconstr(1, 1));

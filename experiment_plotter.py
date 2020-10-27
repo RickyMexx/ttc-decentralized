@@ -12,8 +12,8 @@ EXP_LST = ['reg_nom_fbl', 'reg_nom_pd', 'reg_nom_pp', 'reg_nom_pp_er',
            'reg_real_fbl', 'reg_real_pd', 'reg_real_pp',
            'track_nom_fbl', 'track_nom_pd', 'track_nom_pp',
            'track_real_fbl', 'track_real_pd', 'track_real_pp',
-           'track_real_pp_sm', 'free', 'gravity_nom', 'gravity_real',
-           'reg_nom_lqr_01', 'reg_nom_lqr_02', 'reg_nom_lqr_03']
+           'track_real_pp_sm', 'free', 'gravity_nom', 'gravity_real']
+           #'reg_nom_lqr_01', 'reg_nom_lqr_02', 'reg_nom_lqr_03']
 
 
 def read_table(fname: str) -> pd.DataFrame:
@@ -35,12 +35,15 @@ def plot_curve(ax, x: np.array, c: str, label: str = None, lw=1.0, alpha=1.0):
 
 
 def setup_ax(ax, min_x, max_x, step_major_x, step_minor_x, min_y, max_y, step_major_y, step_minor_y):
+    """
     ax.set_xticks(np.arange(min_x, max_x + 1, step_major_x))
     ax.set_xticks(np.arange(min_x, max_x + 1, step_minor_x), minor=True)
     ax.set_yticks(np.arange(min_y, max_y, step_major_y))
     ax.set_yticks(np.arange(min_y, max_y, step_minor_y), minor=True)
+    """
     ax.grid(which='minor', alpha=0.2)
     ax.grid(which='major', alpha=0.5)
+
     ax.set_xlabel('ms')
     ax.set_ylabel('rad')
     return
@@ -168,19 +171,19 @@ def reg_err_nom_real_comparison(exp_dict):
        after transition phase"""
     fig, ax = plt.subplots(1, 2, figsize=(8, 3))
     ax[0].set_title('e1 w/no mismatch')
-    setup_ax(ax[0], 0, 1100, 200, 100, -0.1, 0.1, 0.01, 0.001)
-    plot_curve(ax[0], exp_dict['reg_nom_pd']['e1'][900:], 'C2', 'pd', lw=2)
-    plot_curve(ax[0], exp_dict['reg_nom_fbl']['e1'][900:], 'C0', 'fbl', lw=2)
-    plot_curve(ax[0], exp_dict['reg_nom_pp']['e1'][900:], 'C1', 'pp', lw=2)
-    plot_curve(ax[0], np.zeros((1100,)), 'k--', 'target', lw=3, alpha=0.5)
+    setup_ax(ax[0], 0, 500, 200, 100, -0.1, 0.1, 0.01, 0.001)
+    plot_curve(ax[0], exp_dict['reg_nom_pd']['e1'][50:550], 'C2', 'pd', lw=2)
+    plot_curve(ax[0], exp_dict['reg_nom_fbl']['e1'][50:550], 'C0', 'fbl', lw=2)
+    plot_curve(ax[0], exp_dict['reg_nom_pp']['e1'][50:550], 'C1', 'pp', lw=2)
+    plot_curve(ax[0], np.zeros((500,)), 'k--', 'target', lw=3, alpha=0.5)
     ax[0].legend()
 
     ax[1].set_title('e1 w/ mismatch')
-    setup_ax(ax[1], 0, 1100, 200, 100, -0.1, 0.2, 0.02, 0.01)
-    plot_curve(ax[1], exp_dict['reg_real_pd']['e1'][900:], 'C2', 'pd', lw=2)
-    plot_curve(ax[1], exp_dict['reg_real_fbl']['e1'][900:], 'C0', 'fbl', lw=2)
-    plot_curve(ax[1], exp_dict['reg_real_pp']['e1'][900:], 'C1', 'pp', lw=2)
-    plot_curve(ax[1], np.zeros((1100,)), 'k--', 'target', lw=3, alpha=0.5)
+    setup_ax(ax[1], 0, 500, 200, 100, -0.1, 0.2, 0.02, 0.01)
+    plot_curve(ax[1], exp_dict['reg_real_pd']['e1'][50:550], 'C2', 'pd', lw=2)
+    plot_curve(ax[1], exp_dict['reg_real_fbl']['e1'][50:550], 'C0', 'fbl', lw=2)
+    plot_curve(ax[1], exp_dict['reg_real_pp']['e1'][50:550], 'C1', 'pp', lw=2)
+    plot_curve(ax[1], np.zeros((500,)), 'k--', 'target', lw=3, alpha=0.5)
     plt.tight_layout()
     # plt.show()
     plt.savefig('images/reg_err_nom_real_comparison.png')
@@ -316,6 +319,5 @@ if __name__ == '__main__':
     track_e_real_pp_sm_comparison(exp_dict)
     track_q_real_comparison(exp_dict)
     gravity_comparison(exp_dict)
-    reg_u_nom_lqr_comparison(exp_dict)
-    reg_q_nom_lqr_comparison(exp_dict)
+    #reg_u_nom_lqr_comparison(exp_dict)
     exit(0)
