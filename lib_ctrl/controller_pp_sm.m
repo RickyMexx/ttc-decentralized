@@ -1,4 +1,4 @@
-function u = controller_pp_sm(q, dq, ddq, a, D, N, qd, err, derr)
+function u = controller_pp_sm(q, dq, ddq, a, D, N, gs, phi, Ks, P, qd, dqd, err, derr)
 %CONTROLLER_PP Pole Placement controller
 %estimate
 %[q,dq,ddq] : Robot State variables 
@@ -25,7 +25,7 @@ B = [zeros(2); inv(Mbr)];
 
 
 
-x = [N\err; N\derr];
+x = [N\(q - qd); N\(dq - dqd)];
 
 %% Sliding Mode
 %% Tracking NOMINAL
@@ -36,11 +36,11 @@ x = [N\err; N\derr];
 %Kr = diag([3.35, 0.335]);
 %K = place(A, B, P);
 %% Tracking REAL
-gs = diag([1 1]); % Weight of error for the sliding surface
-phi = [1 1]; % Boundary layers
-Ks = diag([0.8 0.25]); % Gain of the robust term
-P = [-4.6, -4.3, -4.5, -6.4];
-Kr = diag([9, 0.25]);
+%gs = diag([1 1]); % Weight of error for the sliding surface
+%phi = [1 1]; % Boundary layers
+%Ks = diag([0.8 0.25]); % Gain of the robust term
+%P = [-4.6, -4.3, -4.5, -6.4];
+%Kr = diag([9, 0.25]);
 K = place(A, B, P);
 
 % Sliding surface + saturation
@@ -49,7 +49,7 @@ sat(1,1) = eval_2r_sat(s(1), phi(1));
 sat(2,1) = eval_2r_sat(s(2), phi(2));
 
 %% Final command
-um = -K * x + Ks * sat + Kr * qd + d;
+um = -K * x + Ks * sat + d;
 u = N * um;
 end
 
