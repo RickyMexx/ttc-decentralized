@@ -12,8 +12,8 @@ EXP_LST = ['reg_nom_fbl', 'reg_nom_pd', 'reg_nom_pp', 'reg_nom_pp_er',
            'reg_real_fbl', 'reg_real_pd', 'reg_real_pp',
            'track_nom_fbl', 'track_nom_pd', 'track_nom_pp',
            'track_real_fbl', 'track_real_pd', 'track_real_pp',
-           'track_real_pp_sm', 'free', 'gravity_nom', 'gravity_real']
-           #'reg_nom_lqr_01', 'reg_nom_lqr_02', 'reg_nom_lqr_03']
+           'track_real_pp_sm', 'free', 'gravity_nom', 'gravity_real',
+           'reg_nom_lqr', 'reg_nom_lqr_1', 'reg_nom_lqr_2']
 
 
 def read_table(fname: str) -> pd.DataFrame:
@@ -76,18 +76,18 @@ def reg_u_nom_comparison(exp_dict):
     """Regulation u comparison."""
     fig, ax = plt.subplots(1, 2, figsize=(8, 3))
     ax[0].set_title('u1')
-    setup_ax(ax[0], 0, 600, 100, 20, -5.0, 5.1, 1.0, 0.5)
-    plot_curve(ax[0], exp_dict['reg_nom_pd']['u1'][:600], 'C2', 'pd', lw=1)
-    plot_curve(ax[0], exp_dict['reg_nom_fbl']['u1'][:600], 'C0', 'fbl', lw=2)
-    plot_curve(ax[0], exp_dict['reg_nom_pp']['u1'][:600], 'C1', 'pp', lw=2)
+    setup_ax(ax[0], 0, 50, 100, 20, -5.0, 5.1, 1.0, 0.5)
+    plot_curve(ax[0], exp_dict['reg_nom_pd']['u1'][:50], 'C2', 'pd', lw=1)
+    plot_curve(ax[0], exp_dict['reg_nom_fbl']['u1'][:50], 'C0', 'fbl', lw=2)
+    plot_curve(ax[0], exp_dict['reg_nom_pp']['u1'][:50], 'C1', 'pp', lw=2)
     ax[0].legend()
     ax[0].set_ylabel('Nm')
 
     ax[1].set_title('u2')
-    setup_ax(ax[1], 0, 600, 100, 20, -5.0, 5.1, 1.0, 0.5)
-    plot_curve(ax[1], exp_dict['reg_nom_pd']['u2'][:600], 'C2', 'pd', lw=1)
-    plot_curve(ax[1], exp_dict['reg_nom_fbl']['u2'][:600], 'C0', 'fbl', lw=2)
-    plot_curve(ax[1], exp_dict['reg_nom_pp']['u2'][:600], 'C1', 'pp', lw=2)
+    setup_ax(ax[1], 0, 10, 100, 20, -5.0, 5.1, 1.0, 0.5)
+    plot_curve(ax[1], exp_dict['reg_nom_pd']['u2'][:10], 'C2', 'pd', lw=1)
+    plot_curve(ax[1], exp_dict['reg_nom_fbl']['u2'][:10], 'C0', 'fbl', lw=2)
+    plot_curve(ax[1], exp_dict['reg_nom_pp']['u2'][:10], 'C1', 'pp', lw=2)
 
     ax[1].legend()
     ax[1].set_ylabel('Nm')
@@ -123,20 +123,19 @@ def reg_u_nom_lqr_comparison(exp_dict):
     """
     fig, ax = plt.subplots(1, 2, figsize=(8, 3))
     ax[0].set_title('u1')
-    setup_ax(ax[0], 0, 200, 100, 20, -5, 5.1, 1, 0.5)
-    plot_curve(ax[0], exp_dict['reg_nom_lqr_01']['u1'][:200], 'C0', 'R=1', lw=2)
-    plot_curve(ax[0], exp_dict['reg_nom_lqr_02']['u1'][:200], 'C1', 'R=10', lw=2)
-    plot_curve(ax[0], exp_dict['reg_nom_lqr_03']['u1'][:200], 'C2', 'R=50', lw=2)
+    setup_ax(ax[0], 0, 50, 100, 20, -5, 5.1, 1, 0.5)
+    plot_curve(ax[0], exp_dict['reg_nom_lqr']['u1'][:50], 'C0',   'R=2, Q=1', lw=2)
+    plot_curve(ax[0], exp_dict['reg_nom_lqr_1']['u1'][:50], 'C1', 'R=1, Q=1', lw=2)
+    plot_curve(ax[0], exp_dict['reg_nom_lqr_2']['u1'][:50], 'C2', 'R=1, Q=1.5', lw=2)
     ax[0].set_ylabel('Nm')
     ax[0].legend()
 
     ax[1].set_title('u2')
-    setup_ax(ax[1], 0, 100, 50, 20, -5, 5.1, 1, 0.5)
-    plot_curve(ax[1], exp_dict['reg_nom_lqr_01']['u2'][:100], 'C0', 'R=1', lw=2)
-    plot_curve(ax[1], exp_dict['reg_nom_lqr_02']['u2'][:100], 'C1', 'R=10', lw=2)
-    plot_curve(ax[1], exp_dict['reg_nom_lqr_03']['u2'][:100], 'C2', 'R=50', lw=2)
+    setup_ax(ax[1], 0, 20, 50, 20, -5, 5.1, 1, 0.5)
+    plot_curve(ax[1], exp_dict['reg_nom_lqr']['u2'][:20], 'C0', lw=2)
+    plot_curve(ax[1], exp_dict['reg_nom_lqr_1']['u2'][:20], 'C1', lw=2)
+    plot_curve(ax[1], exp_dict['reg_nom_lqr_2']['u2'][:20], 'C2', lw=2)
     ax[1].set_ylabel('Nm')
-    ax[1].legend()
     plt.tight_layout()
     plt.savefig('images/reg_u_nom_lqr_comparison.png')
 
@@ -148,19 +147,20 @@ def reg_q_nom_lqr_comparison(exp_dict):
     """
     fig, ax = plt.subplots(1, 2, figsize=(8, 3))
     ax[0].set_title('q1')
-    setup_ax(ax[0], 0, 200, 100, 20, -5, 5.1, 1, 0.5)
-    plot_curve(ax[0], exp_dict['reg_nom_lqr_03']['qd1'][:200], 'r--', 'target', lw=2, alpha=0.8)
-    plot_curve(ax[0], exp_dict['reg_nom_lqr_01']['q1'][:200], 'C0', 'R=1', lw=2)
-    plot_curve(ax[0], exp_dict['reg_nom_lqr_02']['q1'][:200], 'C1', 'R=10', lw=2)
-    plot_curve(ax[0], exp_dict['reg_nom_lqr_03']['q1'][:200], 'C2', 'R=50', lw=2)
+    setup_ax(ax[0], 0, 60, 100, 20, -5, 5.1, 1, 0.5)
+    plot_curve(ax[0], exp_dict['reg_nom_lqr']['qd1'][:60], 'r--', 'target', lw=2, alpha=0.8)
+    plot_curve(ax[0], exp_dict['reg_nom_lqr']['q1'][:60], 'C0',   'R=2, Q=1', lw=2)
+    plot_curve(ax[0], exp_dict['reg_nom_lqr_1']['q1'][:60], 'C1', 'R=1, Q=1', lw=2)
+    plot_curve(ax[0], exp_dict['reg_nom_lqr_2']['q1'][:60], 'C2', 'R=1, Q=1.5', lw=2)
+    ax[0].legend()
 
     ax[1].set_title('q2')
-    setup_ax(ax[1], 0, 100, 50, 20, -5, 5.1, 1, 0.5)
-    plot_curve(ax[1], exp_dict['reg_nom_lqr_03']['qd2'][:100], 'r--', 'target', lw=2, alpha=0.8)
-    plot_curve(ax[1], exp_dict['reg_nom_lqr_01']['q2'][:100], 'C0', 'R=1', lw=2)
-    plot_curve(ax[1], exp_dict['reg_nom_lqr_02']['q2'][:100], 'C1', 'R=10', lw=2)
-    plot_curve(ax[1], exp_dict['reg_nom_lqr_03']['q2'][:100], 'C2', 'R=50', lw=2)
-    ax[1].legend()
+    setup_ax(ax[1], 0, 40, 50, 20, -5, 5.1, 1, 0.5)
+    plot_curve(ax[1], exp_dict['reg_nom_lqr']['qd2'][:40], 'r--', 'target', lw=2, alpha=0.8)
+    plot_curve(ax[1], exp_dict['reg_nom_lqr']['q2'][:40], 'C0', 'R=1', lw=2)
+    plot_curve(ax[1], exp_dict['reg_nom_lqr_1']['q2'][:40], 'C1', 'R=10', lw=2)
+    plot_curve(ax[1], exp_dict['reg_nom_lqr_2']['q2'][:40], 'C2', 'R=50', lw=2)
+
     plt.tight_layout()
     plt.savefig('images/reg_q_nom_lqr_comparison.png')
 
@@ -319,5 +319,6 @@ if __name__ == '__main__':
     track_e_real_pp_sm_comparison(exp_dict)
     track_q_real_comparison(exp_dict)
     gravity_comparison(exp_dict)
-    #reg_u_nom_lqr_comparison(exp_dict)
+    reg_u_nom_lqr_comparison(exp_dict)
+    reg_q_nom_lqr_comparison(exp_dict)
     exit(0)

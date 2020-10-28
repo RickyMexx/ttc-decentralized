@@ -2,10 +2,11 @@
 clc
 addpath('lib_2r', 'lib_ctrl', 'lib_utils', 'script_exp');
 % USED CONTROLLER
-USED_CTRL = 'free';
+USED_CTRL = 'lqr';
 % EXPERIMENT TYPE
 EXP_TYPE = 'reg';
 EXP_COND = 'nom';
+EXTRA_NAME = '_2';
 % Simulation time (ms)
 T = 2000;
 % Simulation step (ms)
@@ -78,8 +79,8 @@ phi_sm = [1 1]; % Boundary layers
 P_sm = [-.6, -.3, -.5, -.4]; 
 Ks_sm = diag([0.8, 0.3]);
 %% LQR-Controller Parameters
-Q = diag([1, 1, 1, 1]); % dq1 dq2 ddq1 ddq2 
-R = diag([2, 2.0]); % u1 u2
+Q = diag([1.2, 1.2, 1.5, 1.5]); % dq1 dq2 ddq1 ddq2 
+R = diag([1, 1]); % u1 u2
 %% Simulation Phase
 num_steps = floor(T / dt);
 % Insert all elements that must be stored
@@ -148,5 +149,5 @@ titles = ["e1"; "e2"; "q1"; "q2"; "dq1"; "dq2"; "ddq1"; "ddq2"; "u1"; "u2"];
 data_plot(data_mat, labels, 5, 2, titles);
 
 %% Store experimental data and images
-writetable(T, "data/exp_" + EXP_TYPE + "_" + EXP_COND + "_" + USED_CTRL + ".csv");
-saveas(gcf, "images/exp_" + EXP_TYPE + "_" + EXP_COND + "_" + USED_CTRL + ".fig");
+writetable(T, "data/exp_" + EXP_TYPE + "_" + EXP_COND + "_" + USED_CTRL + EXTRA_NAME + ".csv");
+saveas(gcf, "images/exp_" + EXP_TYPE + "_" + EXP_COND + "_" + USED_CTRL + EXTRA_NAME + ".fig");

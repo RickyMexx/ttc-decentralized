@@ -1,0 +1,9 @@
+exp_reg_nom_lqr:
+	Q = diag([1, 1, 1, 1])
+	R = diag([2, 2])
+exp_reg_nom_lqr_1:
+	Q = diag([1, 1, 1, 1])
+	R = diag([1, 1])
+exp_reg_nom_lqr_2:
+	Q = diag([1.2, 1.2, 1.5, 1.5])
+	R = diag([1, 1])
