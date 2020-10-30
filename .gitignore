@@ -19,3 +19,10 @@ octave-workspace
 
 # Simulink autosave extension
 .autosave
+
+old_scripts/
+old_data/
+
+lib_ctrl/_controller_lqr.m
+
+
