@@ -9,7 +9,7 @@ from matplotlib import pyplot as plt
 EXP_PATH = './data/'
 IMG_PATH = './images/'
 EXP_LST = ['reg_nom_fbl', 'reg_nom_pd', 'reg_nom_pp', 'reg_nom_pp_er',
-           'reg_real_fbl', 'reg_real_pd', 'reg_real_pp',
+           'reg_real_fbl', 'reg_real_pd', 'reg_real_pp', 'reg_real_pp_er',
            'track_nom_fbl', 'track_nom_pd', 'track_nom_pp',
            'track_real_fbl', 'track_real_pd', 'track_real_pp',
            'track_real_pp_sm', 'free', 'gravity_nom', 'gravity_real',
@@ -115,6 +115,27 @@ def reg_q_nom_pp_comparison(exp_dict):
     plt.tight_layout()
     plt.savefig('images/reg_q_nom_pp_comparison.png')
 
+
+def reg_q_real_pp_comparison(exp_dict):
+    """Regulation w/ model mismatch q PP comparison
+    between PP and PP with Error Rejection"""
+    fig, ax = plt.subplots(1, 2, figsize=(8, 3))
+    ax[0].set_title('q1')
+    setup_ax(ax[0], 0, 550, 100, 20, 1.2, 2.2, 0.1, 0.05)
+    plot_curve(ax[0], exp_dict['reg_real_fbl']['qd1'][50:600], 'r--', 'target', lw=2, alpha=0.8)
+    plot_curve(ax[0], exp_dict['reg_real_pp']['q1'][50:600], 'C0', 'pp', lw=2)
+    plot_curve(ax[0], exp_dict['reg_real_pp_er']['q1'][50:600], 'C1', 'pp with error rejection', lw=2)
+
+    ax[1].set_title('q2')
+    setup_ax(ax[1], 0, 600, 100, 20, -3, 5, 0.5, 0.1)
+    plot_curve(ax[1], exp_dict['reg_real_fbl']['qd2'][:600], 'r--', 'target', lw=2, alpha=0.8)
+    plot_curve(ax[1], exp_dict['reg_real_pp']['q2'][:600], 'C0', 'pp', lw=2)
+    plot_curve(ax[1], exp_dict['reg_real_pp_er']['q2'][:600], 'C1', 'pp with error rejection', lw=2)
+    ax[1].legend()
+    plt.tight_layout()
+    plt.savefig('images/reg_q_real_pp_comparison.png')
+
+
 def reg_u_nom_lqr_comparison(exp_dict):
     """Regulation nominal u LQR comparison
     01 -> Q = 1, R = 1
@@ -124,7 +145,7 @@ def reg_u_nom_lqr_comparison(exp_dict):
     fig, ax = plt.subplots(1, 2, figsize=(8, 3))
     ax[0].set_title('u1')
     setup_ax(ax[0], 0, 50, 100, 20, -5, 5.1, 1, 0.5)
-    plot_curve(ax[0], exp_dict['reg_nom_lqr']['u1'][:50], 'C0',   'R=2, Q=1', lw=2)
+    plot_curve(ax[0], exp_dict['reg_nom_lqr']['u1'][:50], 'C0', 'R=2, Q=1', lw=2)
     plot_curve(ax[0], exp_dict['reg_nom_lqr_1']['u1'][:50], 'C1', 'R=1, Q=1', lw=2)
     plot_curve(ax[0], exp_dict['reg_nom_lqr_2']['u1'][:50], 'C2', 'R=1, Q=1.5', lw=2)
     ax[0].set_ylabel('Nm')
@@ -139,6 +160,7 @@ def reg_u_nom_lqr_comparison(exp_dict):
     plt.tight_layout()
     plt.savefig('images/reg_u_nom_lqr_comparison.png')
 
+
 def reg_q_nom_lqr_comparison(exp_dict):
     """Regulation nominal u LQR comparison
     01 -> Q = 1, R = 1
@@ -149,7 +171,7 @@ def reg_q_nom_lqr_comparison(exp_dict):
     ax[0].set_title('q1')
     setup_ax(ax[0], 0, 60, 100, 20, -5, 5.1, 1, 0.5)
     plot_curve(ax[0], exp_dict['reg_nom_lqr']['qd1'][:60], 'r--', 'target', lw=2, alpha=0.8)
-    plot_curve(ax[0], exp_dict['reg_nom_lqr']['q1'][:60], 'C0',   'R=2, Q=1', lw=2)
+    plot_curve(ax[0], exp_dict['reg_nom_lqr']['q1'][:60], 'C0', 'R=2, Q=1', lw=2)
     plot_curve(ax[0], exp_dict['reg_nom_lqr_1']['q1'][:60], 'C1', 'R=1, Q=1', lw=2)
     plot_curve(ax[0], exp_dict['reg_nom_lqr_2']['q1'][:60], 'C2', 'R=1, Q=1.5', lw=2)
     ax[0].legend()
@@ -163,7 +185,6 @@ def reg_q_nom_lqr_comparison(exp_dict):
 
     plt.tight_layout()
     plt.savefig('images/reg_q_nom_lqr_comparison.png')
-
 
 
 def reg_err_nom_real_comparison(exp_dict):
@@ -208,18 +229,18 @@ def reg_q_real_comparison(exp_dict):
     fig, ax = plt.subplots(1, 2, figsize=(8, 3))
     ax[0].set_title('q1')
     setup_ax(ax[0], 0, 600, 100, 20, -0.5, np.pi + 0.01, 0.5, 0.1)
-    plot_curve(ax[0], exp_dict['reg_real_fbl']['qd1'][:600], 'r--', 'target', lw=2, alpha=0.8)
-    plot_curve(ax[0], exp_dict['reg_real_fbl']['q1'][:600], 'C0', 'fbl', lw=2)
-    plot_curve(ax[0], exp_dict['reg_real_pp']['q1'][:600], 'C1', 'pp', lw=2)
-    plot_curve(ax[0], exp_dict['reg_real_pd']['q1'][:600], 'C2', 'pd', lw=2)
+    plot_curve(ax[0], exp_dict['reg_real_fbl']['qd1'][:120], 'r--', 'target', lw=2, alpha=0.8)
+    plot_curve(ax[0], exp_dict['reg_real_fbl']['q1'] [:120], 'C0', 'fbl', lw=2)
+    plot_curve(ax[0], exp_dict['reg_real_pp']['q1']  [:120], 'C1', 'pp', lw=2)
+    plot_curve(ax[0], exp_dict['reg_real_pd']['q1']  [:120], 'C2', 'pd', lw=2)
     ax[0].legend()
 
     ax[1].set_title('q2')
     setup_ax(ax[1], 0, 600, 100, 20, -3, 5, 0.5, 0.1)
-    plot_curve(ax[1], exp_dict['reg_real_fbl']['qd2'][:600], 'r--', 'target', lw=2, alpha=0.8)
-    plot_curve(ax[1], exp_dict['reg_real_fbl']['q2'][:600], 'C0', 'fbl', lw=2)
-    plot_curve(ax[1], exp_dict['reg_real_pp']['q2'][:600], 'C1', 'pp', lw=2)
-    plot_curve(ax[1], exp_dict['reg_real_pd']['q2'][:600], 'C2', 'pd', lw=2)
+    plot_curve(ax[1], exp_dict['reg_real_fbl']['qd2'][:120], 'r--', 'target', lw=2, alpha=0.8)
+    plot_curve(ax[1], exp_dict['reg_real_fbl']['q2'] [:120], 'C0', 'fbl', lw=2)
+    plot_curve(ax[1], exp_dict['reg_real_pp']['q2']  [:120], 'C1', 'pp', lw=2)
+    plot_curve(ax[1], exp_dict['reg_real_pd']['q2']  [:120], 'C2', 'pd', lw=2)
     ax[1].legend()
     plt.tight_layout()
     plt.savefig('images/reg_q_real_comparison.png')
@@ -287,6 +308,27 @@ def track_e_real_pp_sm_comparison(exp_dict):
     plt.tight_layout()
     plt.savefig('images/track_e_real_pp_sm_comparison.png')
 
+
+def track_u_real_pp_sm_comparison(exp_dict):
+    """Tracking task Real Conditions
+        Comparison on u values for pp and pp_sm"""
+    fig, ax = plt.subplots(1, 2, figsize=(8, 3))
+    ax[0].set_title('u1')
+    setup_ax(ax[0], 0, 200, 250, 100, -0.05, 0.05, 0.01, 0.005)
+    plot_curve(ax[0], exp_dict['track_real_pp']['u1'][:150], 'C1', 'pp', lw=2)
+    plot_curve(ax[0], exp_dict['track_real_pp_sm']['u1'][:150], 'C4', 'pp w/ sliding mode', lw=2)
+    ax[0].set_ylabel('Nm')
+
+    ax[1].set_title('u2')
+    setup_ax(ax[1], 0, 200, 300, 150, -0.02, 0.26, 0.02, 0.01)
+    plot_curve(ax[1], exp_dict['track_real_pp']['u2'][:150], 'C1', 'pp', lw=2)
+    plot_curve(ax[1], exp_dict['track_real_pp_sm']['u2'][:150], 'C4', 'pp w/ sliding mode', lw=2)
+    ax[1].set_ylabel('Nm')
+    ax[1].legend(loc='upper right')
+    plt.tight_layout()
+    plt.savefig('images/track_u_real_pp_sm_comparison.png')
+
+
 def gravity_comparison(exp_dict):
     """Gravity and Coulomb Friction controller comparison 
     with nominal and mismatched models [nr=0.001]"""
@@ -312,11 +354,13 @@ if __name__ == '__main__':
     free_evolution_plot(exp_dict)
     reg_q_nom_comparison(exp_dict)
     reg_q_nom_pp_comparison(exp_dict)
+    reg_q_real_pp_comparison(exp_dict)
     reg_u_nom_comparison(exp_dict)
     reg_err_nom_real_comparison(exp_dict)
     track_q_nom_comparison(exp_dict)
     reg_q_real_comparison(exp_dict)
     track_e_real_pp_sm_comparison(exp_dict)
+    track_u_real_pp_sm_comparison(exp_dict)
     track_q_real_comparison(exp_dict)
     gravity_comparison(exp_dict)
     reg_u_nom_lqr_comparison(exp_dict)

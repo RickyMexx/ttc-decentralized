@@ -2,11 +2,11 @@
 clc
 addpath('lib_2r', 'lib_ctrl', 'lib_utils', 'script_exp');
 % USED CONTROLLER
-USED_CTRL = 'lqr';
+USED_CTRL = 'pp_sm';
 % EXPERIMENT TYPE
-EXP_TYPE = 'reg';
-EXP_COND = 'nom';
-EXTRA_NAME = '_2';
+EXP_TYPE = 'track';
+EXP_COND = 'real';
+EXTRA_NAME = '';
 % Simulation time (ms)
 T = 2000;
 % Simulation step (ms)
@@ -74,8 +74,8 @@ err_prec = err;
 P_pp = [-1.3, -1.5, -1.1, -1.8];
 P_pp_er = [-.5, -.4, -.2, -.6];
 %% PP-SlidingMode Parameters
-gs_sm = diag([1 1]); % Weight of error for the sliding surface
-phi_sm = [1 1]; % Boundary layers
+gs_sm = diag([1 1.1]); % Weight of error for the sliding surface
+phi_sm = [0.6 0.5]; % Boundary layers
 P_sm = [-.6, -.3, -.5, -.4]; 
 Ks_sm = diag([0.8, 0.3]);
 %% LQR-Controller Parameters
