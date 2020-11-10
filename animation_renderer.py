@@ -53,12 +53,12 @@ def animate_experiment(exp, model, file: str) -> None:
         return line, line_des, time_text
 
     ani = animation.FuncAnimation(fig, animate, np.arange(50, 2000),
-                                  interval=5, blit=True, init_func=init)
+                                  interval=1, blit=True, init_func=init)
     plt.show()
 
 
 if __name__ == '__main__':
     exp_dict = load_experiments(EXP_LST)
-    animate_experiment(exp_dict, 'track_real_pp_sm', None)
+    animate_experiment(exp_dict, 'track_circle_nom_fbl', None)
     #animate_experiment(exp_dict, 'track_nom_fbl', None)
     exit(0)

@@ -13,7 +13,8 @@ EXP_LST = ['reg_nom_fbl', 'reg_nom_pd', 'reg_nom_pp', 'reg_nom_pp_er',
            'track_nom_fbl', 'track_nom_pd', 'track_nom_pp',
            'track_real_fbl', 'track_real_pd', 'track_real_pp',
            'track_real_pp_sm', 'free', 'gravity_nom', 'gravity_real',
-           'reg_nom_lqr', 'reg_nom_lqr_1', 'reg_nom_lqr_2']
+           'reg_nom_lqr', 'reg_nom_lqr_1', 'reg_nom_lqr_2', 'track_circle_nom_pp',
+           'track_circle_nom_fbl']
 
 
 def read_table(fname: str) -> pd.DataFrame:

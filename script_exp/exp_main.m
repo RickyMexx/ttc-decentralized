@@ -2,11 +2,16 @@
 clc
 addpath('lib_2r', 'lib_ctrl', 'lib_utils', 'script_exp');
 % USED CONTROLLER
-USED_CTRL = 'pp_sm';
+USED_CTRL = 'fbl';
 % EXPERIMENT TYPE
-EXP_TYPE = 'track';
-EXP_COND = 'real';
+EXP_TYPE = 'track_circle';
+EXP_COND = 'nom';
 EXTRA_NAME = '';
+
+% Circle Trajectory params
+pc = [1.0; 1.0]; % Center of the circle
+r = 0.5; % Radius of the circle
+
 % Simulation time (ms)
 T = 2000;
 % Simulation step (ms)
@@ -106,6 +111,10 @@ for i = 1:dt:T
         % Tracking qd update
         dqd = [1e-2 * cos(i / 100); -.5e-2 * sin(i / 50)];
         qd = qd + integrate(dqd, dt);
+    end
+    if strcmp(EXP_TYPE, 'track_circle')
+        % Tracking circle qd update
+        qd = traj_2r_circle(pc, r, l, i, T);
     end
     %qd = [sin(i / 100); cos(i / 50)];
     % Update control term
